@@ -558,7 +558,7 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
                   )}
                 </h2>
                 <span
-                  className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border"
+                  className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border shrink-0"
                   style={{
                     backgroundColor: `${currentTheme.badge}20`,
                     borderColor: `${currentTheme.badge}40`,
@@ -566,6 +566,12 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
                   }}
                 >
                   {currentTheme.name.split(' ')[0]} Mode
+                </span>
+                <span
+                  className="px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider border bg-emerald-500/20 border-emerald-500/40 text-emerald-400 uppercase flex items-center gap-1 shrink-0"
+                >
+                  <Activity className="w-3 h-3" />
+                  120k HD Voice
                 </span>
               </div>
               {!(isAndroid() && isActive) && (
@@ -857,65 +863,7 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
             </div>
           </div>
 
-          {/* ════════════════════════════════════════════════════════════════ */}
-          {/* 🔥 BOTTOM SOUND EFFECTS & DYNAMIC EQUALIZER FREQUENCY BARS 🔥 */}
-          {/* ════════════════════════════════════════════════════════════════ */}
-          {!isPriya && (
-            <div className="w-full max-w-lg mt-4 px-3 flex flex-col items-center gap-2 z-20">
-              {/* Sound FX Header Tag */}
-              <div className="flex items-center justify-between w-full text-[10px] font-bold text-[#9aa0a6] uppercase tracking-wider px-2">
-                <div className="flex items-center gap-1.5">
-                  <Activity className="w-3.5 h-3.5" style={{ color: currentTheme.badge }} />
-                  <span>Live Audio FX Visualizer</span>
-                  {isActive && (
-                    <span className="px-1.5 py-0.2 rounded text-[8px] bg-emerald-500/20 text-emerald-300 uppercase">
-                      Stereo Active
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-1 font-mono">
-                  <span ref={dbTextRef}>0 dB</span>
-                  <span className="text-[#9aa0a6]/50">|</span>
-                  <span style={{ color: currentTheme.accentText }}>24 kHz HD</span>
-                </div>
-              </div>
 
-              {/* Dynamic Real-time Equalizer Frequency Bars */}
-              <div
-                ref={equalizerRef}
-                className="w-full h-14 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 p-2.5 flex items-end justify-between gap-1 shadow-inner relative overflow-hidden"
-              >
-                {/* Subtle background glow when speaking */}
-                <div
-                  className="absolute inset-0 opacity-20 pointer-events-none transition-all duration-300"
-                  style={{
-                    background: `radial-gradient(ellipse at center, ${currentTheme.badge}, transparent 70%)`,
-                  }}
-                />
-
-                {Array.from({ length: 32 }).map((_, idx) => (
-                  <div
-                    key={idx}
-                    className="flex-1 rounded-full transition-all duration-75 relative"
-                    style={{
-                      height: '8%',
-                      background: `linear-gradient(to top, ${currentTheme.eqGradient[0]}, ${currentTheme.eqGradient[1]}, ${currentTheme.eqGradient[2]})`,
-                    }}
-                  />
-                ))}
-              </div>
-
-              {/* Live Oscilloscope Waveform Canvas */}
-              <div className="w-full h-8 overflow-hidden rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-center">
-                <canvas
-                  ref={canvasRef}
-                  width={380}
-                  height={32}
-                  className="w-full h-full opacity-90"
-                />
-              </div>
-            </div>
-          )}
         </main>
 
         {/* Bottom Bar Controls (Mute, Change Voice, End Call, Quick Themes) */}

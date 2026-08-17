@@ -522,7 +522,7 @@ const App: React.FC = () => {
           !outAudioCtxRef.current ||
           outAudioCtxRef.current.state === "closed"
         ) {
-          outAudioCtxRef.current = new AudioCtxClass({ sampleRate: 24000 });
+          outAudioCtxRef.current = new AudioCtxClass({ sampleRate: 48000 });
         }
         if (outAudioCtxRef.current.state === "suspended") {
           await outAudioCtxRef.current.resume();
@@ -653,7 +653,7 @@ const App: React.FC = () => {
       const ai = new GoogleGenAI({ apiKey });
       const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
       outAudioCtxRef.current =
-        outAudioCtxRef.current || new AudioCtxClass({ sampleRate: 24000 });
+        outAudioCtxRef.current || new AudioCtxClass({ sampleRate: 48000 });
       if (outAudioCtxRef.current.state === "suspended") {
         await outAudioCtxRef.current.resume();
       }
