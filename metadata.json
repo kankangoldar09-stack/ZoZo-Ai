@@ -1,0 +1,12 @@
+{
+  "name": "ZoZo AI - Neural Companion",
+  "description": "ZoZo AI by Jeet Boss: Real-human AI companion with periodic coughing and natural expressions, YouTube music playback, phone dialer, live weather, and Indian Railways train tracker.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
