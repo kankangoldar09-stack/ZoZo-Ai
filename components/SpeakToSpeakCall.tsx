@@ -237,6 +237,8 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
           height: height,
           backgroundAlpha: 0,
           antialias: true,
+          resolution: window.devicePixelRatio || 1,
+          autoDensity: true,
         });
         
         live2DAppRef.current = pixiApp;
@@ -710,7 +712,7 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
 
             {/* The Main Stage (Live2D Holographic Glass Capsule or Disc) */}
             {isPriya ? (
-              <div className="relative w-[310px] h-[390px] flex flex-col items-center justify-between pointer-events-auto rounded-3xl border border-white/10 bg-[#0e1015]/60 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-xl p-4 transition-all hover:border-[#8ab4f8]/30">
+              <div className="relative w-full max-w-[365px] md:max-w-[430px] h-[60vh] max-h-[620px] min-h-[440px] flex flex-col items-center justify-between pointer-events-auto rounded-3xl border border-white/10 bg-[#0e1015]/60 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-xl p-4 transition-all hover:border-[#8ab4f8]/30">
                 <div className="absolute inset-0 bg-gradient-to-tr from-[#8ab4f8]/5 via-transparent to-transparent pointer-events-none rounded-3xl" />
                 
                 {/* Active Outer Sound Waves Ring for Priya inside capsule */}

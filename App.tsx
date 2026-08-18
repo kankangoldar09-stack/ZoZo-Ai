@@ -53,6 +53,7 @@ import {
   Flame,
   MoreVertical,
   ChevronLeft,
+  Crown,
 } from "lucide-react";
 import { VoiceModal, VoiceOption, VOICES, getModelVoiceName, getDisplayVoiceName } from "./components/VoiceModal";
 import { PluginsModal, PluginSettings } from "./components/PluginsModal";
@@ -75,6 +76,8 @@ interface Message {
 }
 
 const App: React.FC = () => {
+  const [isPreviewFrameEnabled, setIsPreviewFrameEnabled] = useState(true);
+
   // Auth State
   const [user, setUser] = useState<User | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
@@ -1325,6 +1328,75 @@ Formatting:
     }
   };
 
+  const wrapWithDeviceFrame = (content: React.ReactNode) => {
+    // If preview frame is disabled, render standard layout with a button to toggle it back
+    if (!isPreviewFrameEnabled) {
+      return (
+        <div className="w-screen h-screen flex flex-col bg-[#0a0b0e] relative">
+          {content}
+          <div className="fixed top-4 right-4 z-[999] hidden md:block">
+            <button
+              onClick={() => setIsPreviewFrameEnabled(true)}
+              className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-bold shadow-lg border border-white/10 backdrop-blur-md flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
+              title="Preview inside iPhone 16 Pro Max device frame"
+            >
+              <Crown className="w-4 h-4 text-amber-400" />
+              <span>iPhone 16 Frame</span>
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // Otherwise, render mockup frame on desktop
+    return (
+      <div className="min-h-screen w-full bg-[#030406] flex items-center justify-center p-0 md:p-6 overflow-auto relative z-10">
+        {/* Beautiful Ambient Glows */}
+        <div className="absolute top-1/4 left-1/4 w-[450px] h-[450px] bg-[#2e6eff]/5 blur-[120px] rounded-full pointer-events-none z-0"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-[450px] h-[450px] bg-[#7bddff]/5 blur-[120px] rounded-full pointer-events-none z-0"></div>
+
+        {/* Frame Toggle Button */}
+        <div className="fixed top-4 right-4 z-[999] hidden md:block">
+          <button
+            onClick={() => setIsPreviewFrameEnabled(false)}
+            className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-bold shadow-lg border border-white/10 backdrop-blur-md flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
+            title="Switch to fullscreen standard web view"
+          >
+            <Crown className="w-4 h-4 text-amber-400 fill-amber-400" />
+            <span>Fullscreen View</span>
+          </button>
+        </div>
+
+        {/* iPhone 16 Pro Max Mockup Frame (Only active on desktop screen sizes) */}
+        <div className="relative mx-auto my-auto w-full h-screen md:w-[412px] md:h-[892px] md:rounded-[55px] md:border-[12px] md:border-[#1c1d22] md:ring-[4px] md:ring-[#3b3c40] md:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95)] overflow-hidden flex flex-col bg-[#0a0b0e] z-10 transition-all duration-300">
+          
+          {/* Side Buttons (Action, Volume Up/Down, Power) - Visible on desktop mockup */}
+          <div className="hidden md:block absolute left-[-15px] top-[140px] w-[3px] h-[30px] bg-[#3b3c40] rounded-r-sm z-50"></div> {/* Action Button */}
+          <div className="hidden md:block absolute left-[-15px] top-[190px] w-[3px] h-[60px] bg-[#3b3c40] rounded-r-sm z-50"></div> {/* Vol Up */}
+          <div className="hidden md:block absolute left-[-15px] top-[265px] w-[3px] h-[60px] bg-[#3b3c40] rounded-r-sm z-50"></div> {/* Vol Down */}
+          <div className="hidden md:block absolute right-[-15px] top-[200px] w-[3px] h-[75px] bg-[#3b3c40] rounded-l-sm z-50"></div> {/* Power Button */}
+          
+          {/* Dynamic Island (Desktop Frame only) */}
+          <div className="hidden md:flex absolute top-3 left-1/2 -translate-x-1/2 w-[110px] h-[28px] bg-black rounded-full z-[1000] border border-white/5 shadow-inner items-center justify-between px-3">
+            <div className="w-2.5 h-2.5 rounded-full bg-[#0c1020] border border-white/10"></div>
+            <div className="w-1.5 h-1.5 rounded-full bg-[#080810] opacity-40"></div>
+          </div>
+
+          {/* Speaker Slit (Desktop Frame only) */}
+          <div className="hidden md:block absolute top-1 left-1/2 -translate-x-1/2 w-[60px] h-[3px] bg-[#1a1b1f] rounded-full z-[1000]"></div>
+
+          {/* Glare/Shine Effect Over Screen */}
+          <div className="hidden md:block absolute inset-0 bg-gradient-to-tr from-white/0 via-white/[0.02] to-white/[0.07] pointer-events-none z-[99] rounded-[43px]"></div>
+
+          {/* Inner Content Sized to Phone screen */}
+          <div className="flex-1 flex flex-col h-full overflow-hidden rounded-none md:rounded-[43px] relative z-10">
+            {content}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (isAuthLoading) {
     return (
       <div className="h-full w-full bg-[#0a0a0a] flex items-center justify-center">
@@ -1339,7 +1411,7 @@ Formatting:
   }
 
   if (!user) {
-    return (
+    return wrapWithDeviceFrame(
       <div className="h-full w-full bg-[#0a0b0d] flex items-center justify-center p-4 relative overflow-hidden select-none">
         <div className="absolute top-[-10%] left-[-10%] w-[45%] h-[45%] bg-[#2e6eff]/15 blur-[140px] rounded-full pointer-events-none"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[45%] h-[45%] bg-[#7bddff]/15 blur-[140px] rounded-full pointer-events-none"></div>
@@ -1380,7 +1452,7 @@ Formatting:
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="user@example.com"
+                  placeholder="name@example.com"
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 outline-none focus:border-[#2e6eff]/60 transition-all text-sm text-white"
                   required
                 />
@@ -1440,7 +1512,7 @@ Formatting:
     );
   }
 
-  return (
+  return wrapWithDeviceFrame(
     <div className="h-full w-full bg-[#0a0b0e] flex flex-col text-[#e3e3e3] overflow-hidden select-none relative">
       {/* Dynamic Ambient Background Glow */}
       <div className="absolute top-[-15%] left-[-10%] w-[50%] h-[50%] bg-[#2e6eff]/10 blur-[150px] rounded-full pointer-events-none"></div>
