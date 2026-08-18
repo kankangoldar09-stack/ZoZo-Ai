@@ -172,7 +172,8 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
   const isPriya = selectedVoice.toLowerCase() === 'priya';
   const isJeet = selectedVoice.toLowerCase() === 'jeet';
   const isAnanya = selectedVoice.toLowerCase() === 'ananya';
-  const hasLive2DModel = isPriya || isJeet || isAnanya;
+  const isDiya = selectedVoice.toLowerCase() === 'diya';
+  const hasLive2DModel = isPriya || isJeet || isAnanya || isDiya;
 
   const isActiveRef = useRef(isActive);
   const isModelSpeakingRef = useRef(isModelSpeaking);
@@ -189,6 +190,70 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
   useEffect(() => {
     outAnalyserNodeRef.current = outAnalyserNode;
   }, [outAnalyserNode]);
+
+  // Background speech recognition for triggering waving motion on "hello"
+  useEffect(() => {
+    if (!isActive || !hasLive2DModel) return;
+
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) return;
+
+    let recognition: any = null;
+    try {
+      recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = "hi-IN"; // Supports both Hindi and English greetings
+
+      recognition.onresult = (event: any) => {
+        const lastResultIndex = event.results.length - 1;
+        const transcript = event.results[lastResultIndex][0].transcript.toLowerCase();
+        
+        // Check for common greetings
+        if (
+          transcript.includes("hello") || 
+          transcript.includes("hi") || 
+          transcript.includes("hey") || 
+          transcript.includes("namaste") ||
+          transcript.includes("hallo")
+        ) {
+          if (live2DModelRef.current) {
+            // Trigger FlickLeft (waving/greeting animation for Live2D models)
+            live2DModelRef.current.motion("FlickLeft");
+          }
+        }
+      };
+
+      recognition.onerror = (e: any) => {
+        console.warn("Background speech recognition error:", e);
+      };
+
+      recognition.onend = () => {
+        // Restart recognition if call is still active
+        if (isActiveRef.current && recognition) {
+          try {
+            recognition.start();
+          } catch (err) {}
+        }
+      };
+
+      recognition.start();
+    } catch (err) {
+      console.warn("Could not start background SpeechRecognition:", err);
+    }
+
+    return () => {
+      if (recognition) {
+        try {
+          recognition.onend = null;
+          recognition.stop();
+        } catch (e) {}
+      }
+    };
+  }, [isActive, hasLive2DModel]);
 
   const cleanupLive2D = () => {
     if (live2DModelRef.current) {
@@ -255,6 +320,8 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
           modelPath = '/runtime/natori_pro_t06.model3.json';
         } else if (isAnanya) {
           modelPath = '/runtime/miku/miku_sample_t04.model3.json';
+        } else if (isDiya) {
+          modelPath = '/runtime/rice/rice_pro_t03.model3.json';
         }
 
         const loadedModel = await Live2DModel.from(modelPath, {
@@ -289,6 +356,11 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
           scale = Math.min(scaleX, scaleY) * 1.28;
           anchorY = 0.40;
           offsetY = -12;
+        } else if (isDiya) {
+          // Special scaling and offset adjustment for Rice model
+          scale = Math.min(scaleX, scaleY) * 1.32;
+          anchorY = 0.36;
+          offsetY = -15;
         }
         
         loadedModel.scale.set(scale);
