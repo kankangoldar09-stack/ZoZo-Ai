@@ -170,6 +170,8 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
   const live2dCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const isPriya = selectedVoice.toLowerCase() === 'priya';
+  const isJeet = selectedVoice.toLowerCase() === 'jeet';
+  const hasLive2DModel = isPriya || isJeet;
 
   const isActiveRef = useRef(isActive);
   const isModelSpeakingRef = useRef(isModelSpeaking);
@@ -208,7 +210,7 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
   };
 
   useEffect(() => {
-    if (!isOpen || !isPriya) {
+    if (!isOpen || !hasLive2DModel) {
       cleanupLive2D();
       return;
     }
@@ -247,9 +249,12 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
         
         live2DAppRef.current = pixiApp;
 
-        const loadedModel = await Live2DModel.from('/runtime/hiyori_pro_t11.model3.json', {
-          autoUpdate: true
-        });
+        const loadedModel = await Live2DModel.from(
+          isJeet 
+            ? '/runtime/natori_pro_t06.model3.json' 
+            : '/runtime/hiyori_pro_t11.model3.json', 
+          { autoUpdate: true }
+        );
 
         // Force high quality texture filtering on all model textures for ultra-HD quality
         if (loadedModel.textures) {
@@ -333,7 +338,7 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
       clearTimeout(timer);
       cleanupLive2D();
     };
-  }, [isOpen, isPriya]);
+  }, [isOpen, hasLive2DModel, selectedVoice]);
 
   const currentTheme = COLOR_THEMES.find((t) => t.id === selectedThemeId) || COLOR_THEMES[0];
   const displayVoiceName = getDisplayVoiceName(selectedVoice);
@@ -708,8 +713,8 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
 
           {/* Main Voice Disc/Capsule Container */}
           <div className="relative flex items-center justify-center my-auto pt-2 z-30">
-            {/* Active Outer Sound Waves Ring (Only when not Priya) */}
-            {isActive && !isPriya && (
+            {/* Active Outer Sound Waves Ring (Only when no Live2D model) */}
+            {isActive && !hasLive2DModel && (
               <div
                 ref={pingRingRef}
                 className="absolute rounded-full border pointer-events-none transition-all duration-300 animate-ping"
@@ -723,11 +728,11 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
             )}
 
             {/* The Main Stage (Live2D Holographic Glass Capsule or Disc) */}
-            {isPriya ? (
+            {hasLive2DModel ? (
               <div className="relative w-full max-w-[365px] md:max-w-[430px] h-[60vh] max-h-[620px] min-h-[440px] flex flex-col items-center justify-between pointer-events-auto rounded-3xl border border-white/10 bg-[#0e1015]/60 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-xl p-4 transition-all hover:border-[#8ab4f8]/30">
                 <div className="absolute inset-0 bg-gradient-to-tr from-[#8ab4f8]/5 via-transparent to-transparent pointer-events-none rounded-3xl" />
                 
-                {/* Active Outer Sound Waves Ring for Priya inside capsule */}
+                {/* Active Outer Sound Waves Ring inside capsule */}
                 {isActive && (
                   <div
                     className="absolute inset-0 rounded-3xl border border-white/10 pointer-events-none animate-pulse"
@@ -743,7 +748,7 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
                   <canvas 
                     ref={live2dCanvasRef} 
                     className="w-full h-full object-contain cursor-pointer" 
-                    title="Priya (Live2D Okayu Girl)"
+                    title={`${selectedVoice} (Live2D Model)`}
                   />
                 </div>
 
