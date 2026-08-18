@@ -171,7 +171,8 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
 
   const isPriya = selectedVoice.toLowerCase() === 'priya';
   const isJeet = selectedVoice.toLowerCase() === 'jeet';
-  const hasLive2DModel = isPriya || isJeet;
+  const isAnanya = selectedVoice.toLowerCase() === 'ananya';
+  const hasLive2DModel = isPriya || isJeet || isAnanya;
 
   const isActiveRef = useRef(isActive);
   const isModelSpeakingRef = useRef(isModelSpeaking);
@@ -249,12 +250,16 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
         
         live2DAppRef.current = pixiApp;
 
-        const loadedModel = await Live2DModel.from(
-          isJeet 
-            ? '/runtime/natori_pro_t06.model3.json' 
-            : '/runtime/hiyori_pro_t11.model3.json', 
-          { autoUpdate: true }
-        );
+        let modelPath = '/runtime/hiyori_pro_t11.model3.json';
+        if (isJeet) {
+          modelPath = '/runtime/natori_pro_t06.model3.json';
+        } else if (isAnanya) {
+          modelPath = '/runtime/miku/miku_sample_t04.model3.json';
+        }
+
+        const loadedModel = await Live2DModel.from(modelPath, {
+          autoUpdate: true
+        });
 
         // Force high quality texture filtering on all model textures for ultra-HD quality
         if (loadedModel.textures) {
@@ -274,12 +279,22 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
 
         const scaleX = width / loadedModel.width;
         const scaleY = height / loadedModel.height;
-        const scale = Math.min(scaleX, scaleY) * 1.35; // Zoomed in!
+        
+        let scale = Math.min(scaleX, scaleY) * 1.35; // Zoomed in!
+        let anchorY = 0.38;
+        let offsetY = -20;
+
+        if (isAnanya) {
+          // Special scaling and offset adjustment for Hatsune Miku model
+          scale = Math.min(scaleX, scaleY) * 1.28;
+          anchorY = 0.40;
+          offsetY = -12;
+        }
         
         loadedModel.scale.set(scale);
-        loadedModel.anchor.set(0.5, 0.38); // Shift focus up to head/chest
+        loadedModel.anchor.set(0.5, anchorY); // Shift focus to head/chest area
         loadedModel.x = width / 2;
-        loadedModel.y = height / 2 - 20; // Shift upward slightly
+        loadedModel.y = height / 2 + offsetY; // Shift upward slightly
         loadedModel.interactive = true;
 
         const handleMouseMove = (e: PointerEvent) => {
