@@ -127,6 +127,8 @@ interface SpeakToSpeakCallProps {
   onOpenVoiceModal: () => void;
   micStream: MediaStream | null;
   outAnalyserNode: AnalyserNode | null;
+  isVoiceEnabled: boolean;
+  onToggleVoice: () => void;
 }
 
 export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
@@ -142,6 +144,8 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
   onOpenVoiceModal,
   micStream,
   outAnalyserNode,
+  isVoiceEnabled,
+  onToggleVoice,
 }) => {
   const [isMuted, setIsMuted] = useState(false);
   const pingRingRef = useRef<HTMLDivElement | null>(null);
@@ -247,6 +251,14 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
           autoUpdate: true
         });
 
+        // Force high quality texture filtering on all model textures for ultra-HD quality
+        if (loadedModel.textures) {
+          loadedModel.textures.forEach(tex => {
+            tex.baseTexture.scaleMode = PIXI.SCALE_MODES.LINEAR;
+            tex.baseTexture.mipmap = PIXI.MIPMAP_MODES.ON;
+          });
+        }
+
         if (!active) {
           pixiApp.destroy(true, { children: true });
           return;
@@ -257,12 +269,12 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
 
         const scaleX = width / loadedModel.width;
         const scaleY = height / loadedModel.height;
-        const scale = Math.min(scaleX, scaleY) * 0.95;
+        const scale = Math.min(scaleX, scaleY) * 1.35; // Zoomed in!
         
         loadedModel.scale.set(scale);
-        loadedModel.anchor.set(0.5, 0.5);
+        loadedModel.anchor.set(0.5, 0.38); // Shift focus up to head/chest
         loadedModel.x = width / 2;
-        loadedModel.y = height / 2 + 10;
+        loadedModel.y = height / 2 - 20; // Shift upward slightly
         loadedModel.interactive = true;
 
         const handleMouseMove = (e: PointerEvent) => {
@@ -889,6 +901,24 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
                     <Mic className="w-4 h-4 text-emerald-400" />
                   )}
                   <span>{isMuted ? 'Unmute Mic' : 'Mute Mic'}</span>
+                </button>
+
+                {/* Speaker Mute / Unmute Button */}
+                <button
+                  onClick={onToggleVoice}
+                  className={`py-2 px-3.5 rounded-xl border transition-all flex items-center gap-2 text-xs font-bold shadow-md ${
+                    !isVoiceEnabled
+                      ? 'bg-red-500/20 text-red-300 border-red-500/40 hover:bg-red-500/30'
+                      : 'bg-white/10 text-white border-white/20 hover:bg-white/15'
+                  }`}
+                  title={isVoiceEnabled ? 'Mute Assistant Voice' : 'Unmute Assistant Voice'}
+                >
+                  {!isVoiceEnabled ? (
+                    <VolumeX className="w-4 h-4 text-red-400" />
+                  ) : (
+                    <Volume2 className="w-4 h-4 text-[#7bddff]" />
+                  )}
+                  <span>{isVoiceEnabled ? 'Mute Voice' : 'Unmute Voice'}</span>
                 </button>
 
                 {/* Voice Changer Direct Button with Indian Name Display */}

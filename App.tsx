@@ -116,6 +116,10 @@ const App: React.FC = () => {
   const [isTrainModalOpen, setIsTrainModalOpen] = useState(false);
   const [trainQueryNum, setTrainQueryNum] = useState("12301");
   const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
+  const isVoiceEnabledRef = useRef(isVoiceEnabled);
+  useEffect(() => {
+    isVoiceEnabledRef.current = isVoiceEnabled;
+  }, [isVoiceEnabled]);
   const [selectedVoice, setSelectedVoice] = useState<string>(() => {
     try {
       return localStorage.getItem("jeet_selected_voice") || "Jeet";
@@ -726,7 +730,7 @@ const App: React.FC = () => {
 
             const audioData =
               msg.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
-            if (audioData && outAudioCtxRef.current) {
+            if (audioData && outAudioCtxRef.current && isVoiceEnabledRef.current) {
               if (outAudioCtxRef.current.state === "suspended") {
                 await outAudioCtxRef.current.resume();
               }
@@ -1550,6 +1554,27 @@ Formatting:
             </span>
           </button>
 
+          {/* Voice Mute Toggle Button */}
+          <button
+            onClick={() => {
+              setIsVoiceEnabled(!isVoiceEnabled);
+              if (isVoiceEnabled) {
+                stopAllSpeech();
+              }
+            }}
+            className="p-2 md:px-3 md:py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center gap-1.5 transition-all shadow-md"
+            title={isVoiceEnabled ? "Mute Assistant Voice" : "Unmute Assistant Voice"}
+          >
+            {isVoiceEnabled ? (
+              <Volume2 className="w-4 h-4 text-[#7bddff]" />
+            ) : (
+              <VolumeX className="w-4 h-4 text-red-400" />
+            )}
+            <span className="hidden sm:inline text-xs font-semibold text-[#e3e3e3]">
+              {isVoiceEnabled ? "Mute" : "Unmute"}
+            </span>
+          </button>
+
           {/* 3-Points / 3-Dots Drawer Trigger Button */}
           <button
             onClick={() => setIsDrawerOpen(true)}
@@ -2064,6 +2089,13 @@ Formatting:
         onOpenVoiceModal={() => setIsVoiceModalOpen(true)}
         micStream={micStreamRef.current}
         outAnalyserNode={outAnalyserNode}
+        isVoiceEnabled={isVoiceEnabled}
+        onToggleVoice={() => {
+          setIsVoiceEnabled(!isVoiceEnabled);
+          if (isVoiceEnabled) {
+            stopAllSpeech();
+          }
+        }}
       />
 
       {/* Fullscreen Image Preview Modal */}
