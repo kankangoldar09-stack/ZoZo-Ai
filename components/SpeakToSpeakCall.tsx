@@ -325,7 +325,7 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
         } else if (isDiya) {
           modelPath = '/runtime/rice/rice_pro_t03.model3.json';
         } else if (isAarav) {
-          modelPath = '/runtime/ren/ren.model3.json';
+          modelPath = '/runtime/mark/mark_free_t04.model3.json';
         }
 
         const loadedModel = await Live2DModel.from(modelPath, {
@@ -366,7 +366,7 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
           anchorY = 0.36;
           offsetY = -15;
         } else if (isAarav) {
-          // Special scaling and offset adjustment for Ren model
+          // Special scaling and offset adjustment for Mark model
           scale = Math.min(scaleX, scaleY) * 1.25;
           anchorY = 0.38;
           offsetY = -15;
