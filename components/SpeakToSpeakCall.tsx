@@ -179,6 +179,7 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
   const isActiveRef = useRef(isActive);
   const isModelSpeakingRef = useRef(isModelSpeaking);
   const outAnalyserNodeRef = useRef(outAnalyserNode);
+  const isMutedRef = useRef(isMuted);
 
   useEffect(() => {
     isActiveRef.current = isActive;
@@ -191,6 +192,10 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
   useEffect(() => {
     outAnalyserNodeRef.current = outAnalyserNode;
   }, [outAnalyserNode]);
+
+  useEffect(() => {
+    isMutedRef.current = isMuted;
+  }, [isMuted]);
 
   // Background speech recognition for triggering waving motion on "hello"
   useEffect(() => {
@@ -210,6 +215,7 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
       recognition.lang = "hi-IN"; // Supports both Hindi and English greetings
 
       recognition.onresult = (event: any) => {
+        if (isMutedRef.current) return;
         const lastResultIndex = event.results.length - 1;
         const transcript = event.results[lastResultIndex][0].transcript.toLowerCase();
         
@@ -420,6 +426,26 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
           }
           
           core.setParameterValueById("ParamMouthOpenY", mouthOpen);
+
+          // Automatic blinking logic for Aarav (Mark model) since his motions do not animate eyes
+          if (isAarav) {
+            const time = Date.now();
+            const cycle = 4000; // blink every 4 seconds
+            const blinkDuration = 200; // blink duration 200ms
+            const modTime = time % cycle;
+            
+            let eyeOpen = 1.0;
+            if (modTime < blinkDuration) {
+              const halfDuration = blinkDuration / 2;
+              if (modTime < halfDuration) {
+                eyeOpen = 1.0 - (modTime / halfDuration);
+              } else {
+                eyeOpen = (modTime - halfDuration) / halfDuration;
+              }
+            }
+            core.setParameterValueById("ParamEyeLOpen", eyeOpen);
+            core.setParameterValueById("ParamEyeROpen", eyeOpen);
+          }
         });
 
       } catch (err: any) {
