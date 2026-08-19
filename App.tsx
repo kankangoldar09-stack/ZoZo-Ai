@@ -222,6 +222,12 @@ const App: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const dialogueQueueRef = useRef<{ voice: string; text: string }[]>([]);
+  const isPlayingQueueRef = useRef(false);
+  const currentTurnTextRef = useRef("");
+  const processedLinesCountRef = useRef(0);
+  const muteLiveAudioRef = useRef(false);
+
   // Auth Listener
   useEffect(() => {
     if (!auth) {
@@ -328,6 +334,9 @@ const App: React.FC = () => {
     }
     setMessages([]);
     setGallery([]);
+    try {
+      localStorage.removeItem("jeet_chat_messages");
+    } catch (e) {}
   };
 
   const getUserName = () => {
@@ -369,6 +378,29 @@ const App: React.FC = () => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, isSearching, isGeneratingImage, isStreaming, streamingText]);
 
+  // Load saved chat messages from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("jeet_chat_messages");
+      if (saved) {
+        setMessages(JSON.parse(saved));
+      }
+    } catch (e) {
+      console.warn("Failed to load saved messages", e);
+    }
+  }, []);
+
+  // Save chat messages to localStorage on updates
+  useEffect(() => {
+    try {
+      if (messages && messages.length > 0) {
+        localStorage.setItem("jeet_chat_messages", JSON.stringify(messages));
+      }
+    } catch (e) {
+      console.warn("Failed to save messages", e);
+    }
+  }, [messages]);
+
   const activeTtsSourceRef = useRef<AudioBufferSourceNode | null>(null);
 
   const stopAllSpeech = useCallback(() => {
@@ -387,8 +419,11 @@ const App: React.FC = () => {
     setPreviewingVoiceId(null);
   }, []);
 
-  const speakWithBrowserTTS = (text: string, voiceName?: string) => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+  const speakWithBrowserTTS = (text: string, voiceName?: string, onEnded?: () => void) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      if (onEnded) onEnded();
+      return;
+    }
     try {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
@@ -467,23 +502,32 @@ const App: React.FC = () => {
       utterance.onend = () => {
         setIsModelSpeaking(false);
         setPreviewingVoiceId(null);
+        if (onEnded) onEnded();
       };
       utterance.onerror = () => {
         setIsModelSpeaking(false);
         setPreviewingVoiceId(null);
+        if (onEnded) onEnded();
       };
 
       window.speechSynthesis.speak(utterance);
     } catch (err) {
       setIsModelSpeaking(false);
       setPreviewingVoiceId(null);
+      if (onEnded) onEnded();
     }
   };
 
-  const speakText = async (text: string, customVoice?: string) => {
-    if (!isVoiceEnabled && !customVoice) return;
+  const speakText = async (text: string, customVoice?: string, onEnded?: () => void) => {
+    if (!isVoiceEnabled && !customVoice) {
+      if (onEnded) onEnded();
+      return;
+    }
     const cleanSpeech = cleanTextForSpeech(text) || text;
-    if (!cleanSpeech.trim()) return;
+    if (!cleanSpeech.trim()) {
+      if (onEnded) onEnded();
+      return;
+    }
     const voiceToUse = customVoice || selectedVoice || "Jeet";
     const modelVoiceName = getModelVoiceName(voiceToUse);
 
@@ -493,7 +537,7 @@ const App: React.FC = () => {
     const apiKey = getEffectiveApiKey();
 
     if (!apiKey) {
-      speakWithBrowserTTS(cleanSpeech, voiceToUse);
+      speakWithBrowserTTS(cleanSpeech, voiceToUse, onEnded);
       return;
     }
 
@@ -553,19 +597,59 @@ const App: React.FC = () => {
             activeTtsSourceRef.current = null;
             setIsModelSpeaking(false);
             setPreviewingVoiceId(null);
+            if (onEnded) onEnded();
           }
         };
         source.start(0);
         return;
       }
 
-      speakWithBrowserTTS(cleanSpeech, voiceToUse);
+      speakWithBrowserTTS(cleanSpeech, voiceToUse, onEnded);
     } catch (err: any) {
       console.warn("Gemini TTS Error, falling back to natural speech:", err?.message || err);
       setPreviewingVoiceId(null);
-      speakWithBrowserTTS(cleanSpeech, voiceToUse);
+      speakWithBrowserTTS(cleanSpeech, voiceToUse, onEnded);
     }
   };
+
+  const addLiveMessageChunk = useCallback((role: "user" | "model", text: string, append: boolean) => {
+    setMessages((prev) => {
+      if (prev.length === 0) {
+        return [{ role, text }];
+      }
+      const last = prev[prev.length - 1];
+      if (last.role === role && append) {
+        return [
+          ...prev.slice(0, -1),
+          { ...last, text: last.text + text }
+        ];
+      } else {
+        return [
+          ...prev,
+          { role, text }
+        ];
+      }
+    });
+  }, []);
+
+  const playNextDialogue = useCallback(async () => {
+    if (dialogueQueueRef.current.length === 0) {
+      isPlayingQueueRef.current = false;
+      return;
+    }
+
+    isPlayingQueueRef.current = true;
+    const nextLine = dialogueQueueRef.current.shift();
+    if (nextLine) {
+      let voice = nextLine.voice;
+      if (voice.toLowerCase() === "narrator") {
+        voice = "Jeet";
+      }
+      await speakText(nextLine.text, voice, () => {
+        setTimeout(playNextDialogue, 400);
+      });
+    }
+  }, [speakText]);
 
   const inAudioCtxRef = useRef<AudioContext | null>(null);
   const micStreamRef = useRef<MediaStream | null>(null);
@@ -576,6 +660,11 @@ const App: React.FC = () => {
     setIsActive(false);
     setIsConnecting(false);
     setIsModelSpeaking(false);
+    dialogueQueueRef.current = [];
+    isPlayingQueueRef.current = false;
+    muteLiveAudioRef.current = false;
+    currentTurnTextRef.current = "";
+    processedLinesCountRef.current = 0;
     if (sessionRef.current) {
       try {
         sessionRef.current.close();
@@ -614,6 +703,11 @@ const App: React.FC = () => {
     try {
       setIsConnecting(true);
       setIsSpeakToSpeakOpen(true);
+      dialogueQueueRef.current = [];
+      isPlayingQueueRef.current = false;
+      muteLiveAudioRef.current = false;
+      currentTurnTextRef.current = "";
+      processedLinesCountRef.current = 0;
       
       // 1. Request microphone permission first so the browser prompt shows up immediately
       if (typeof window !== "undefined") {
@@ -739,12 +833,129 @@ const App: React.FC = () => {
               activeSourcesRef.current.clear();
               nextStartTimeRef.current = 0;
               setIsModelSpeaking(false);
+              
+              // Clear roleplay queues on interruption
+              dialogueQueueRef.current = [];
+              isPlayingQueueRef.current = false;
+              muteLiveAudioRef.current = false;
+              currentTurnTextRef.current = "";
+              processedLinesCountRef.current = 0;
               return;
             }
 
+            // 1. Process user input transcription (when user speaks, we log it and stop AI speech)
+            if (msg.serverContent?.inputTranscription) {
+              const text = msg.serverContent.inputTranscription.text;
+              if (text && text.trim() !== "") {
+                addLiveMessageChunk("user", text, false);
+                
+                // Clear active playbacks/queues
+                stopAllSpeech();
+                dialogueQueueRef.current = [];
+                isPlayingQueueRef.current = false;
+                muteLiveAudioRef.current = false;
+                currentTurnTextRef.current = "";
+                processedLinesCountRef.current = 0;
+              }
+            }
+
+            // 2. Process model output transcription (incremental chunks)
+            if (msg.serverContent?.outputTranscription) {
+              const text = msg.serverContent.outputTranscription.text;
+              if (text && text.trim() !== "") {
+                addLiveMessageChunk("model", text, true);
+
+                // Accumulate turn text for multi-voice parsing
+                currentTurnTextRef.current += text;
+
+                const lines = currentTurnTextRef.current.split("\n");
+
+                // Check if we should activate multi-voice roleplay muting
+                if (!muteLiveAudioRef.current) {
+                  for (const line of lines) {
+                    const cleanLine = line.trim();
+                    if (/^\s*(Priya|Aarav|Rohan|Kabir|Ananya|Diya|Riya|Jeet|Narrator)\s*:/i.test(cleanLine)) {
+                      muteLiveAudioRef.current = true;
+                      console.log("[Live2D] Multi-voice roleplay script detected. Muting default server audio.");
+                      // Stop any active server audio output
+                      activeSourcesRef.current.forEach((s) => {
+                        try { s.stop(); } catch (e) {}
+                      });
+                      activeSourcesRef.current.clear();
+                      nextStartTimeRef.current = 0;
+                      break;
+                    }
+                  }
+                }
+
+                // If in multi-voice mode, play complete lines (not the last line which might be incomplete/streaming)
+                if (muteLiveAudioRef.current) {
+                  const endsWithNewline = currentTurnTextRef.current.endsWith("\n");
+                  const limit = endsWithNewline ? lines.length : lines.length - 1;
+
+                  while (processedLinesCountRef.current < limit) {
+                    const line = lines[processedLinesCountRef.current].trim();
+                    processedLinesCountRef.current++;
+
+                    if (line) {
+                      const match = line.match(/^\s*(Priya|Aarav|Rohan|Kabir|Ananya|Diya|Riya|Jeet|Narrator)\s*:\s*(.*)$/i);
+                      if (match) {
+                        const voice = match[1];
+                        const dialogue = match[2];
+                        dialogueQueueRef.current.push({ voice, text: dialogue });
+                        if (!isPlayingQueueRef.current) {
+                          playNextDialogue();
+                        }
+                      } else {
+                        dialogueQueueRef.current.push({ voice: selectedVoice, text: line });
+                        if (!isPlayingQueueRef.current) {
+                          playNextDialogue();
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+
+            // 3. Process turn completion (handles last incomplete line and resets states)
+            if (msg.serverContent?.turnComplete) {
+              if (muteLiveAudioRef.current) {
+                const lines = currentTurnTextRef.current.split("\n");
+                if (processedLinesCountRef.current < lines.length) {
+                  const line = lines[processedLinesCountRef.current].trim();
+                  processedLinesCountRef.current++;
+                  if (line) {
+                    const match = line.match(/^\s*(Priya|Aarav|Rohan|Kabir|Ananya|Diya|Riya|Jeet|Narrator)\s*:\s*(.*)$/i);
+                    if (match) {
+                      const voice = match[1];
+                      const dialogue = match[2];
+                      dialogueQueueRef.current.push({ voice, text: dialogue });
+                      if (!isPlayingQueueRef.current) {
+                        playNextDialogue();
+                      }
+                    } else {
+                      dialogueQueueRef.current.push({ voice: selectedVoice, text: line });
+                      if (!isPlayingQueueRef.current) {
+                        playNextDialogue();
+                      }
+                    }
+                  }
+                }
+              }
+              currentTurnTextRef.current = "";
+              processedLinesCountRef.current = 0;
+            }
+
+            // 4. Decode and stream raw audio data if not in multi-voice mode
             const audioData =
               msg.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
             if (audioData && outAudioCtxRef.current && isVoiceEnabledRef.current) {
+              // If we are playing multi-voice TTS, discard incoming server-side raw audio
+              if (muteLiveAudioRef.current) {
+                return;
+              }
+
               if (outAudioCtxRef.current.state === "suspended") {
                 await outAudioCtxRef.current.resume();
               }
@@ -791,6 +1002,8 @@ const App: React.FC = () => {
         },
         config: {
           responseModalities: [Modality.AUDIO],
+          inputAudioTranscription: {},
+          outputAudioTranscription: {},
           speechConfig: {
             voiceConfig: {
               prebuiltVoiceConfig: { voiceName: getModelVoiceName(selectedVoice || "Jeet") },
@@ -807,6 +1020,26 @@ CREATOR & ORIGIN (CRITICAL IDENTITY RULE):
 REAL HUMAN EXPRESSIONS & VOCAL MANNERISMS (ULTRA-REALISTIC HUMAN FEEL):
 - ZoZo AI real human vibes deta hai. Baatein karte waqt natural aur dynamic emotion express karo.
 - Do NOT use simulated sound effects, coughing noises (*Khh-khh!*, *ahem*, *coughs*), or simulated illnesses/fever. Keep the voice clean, friendly, and natural.
+
+MULTI-VOICE ROLEPLAY MODE (CRITICAL RULE FOR SCRIPTS/STORIES):
+- Agar user aapse koi kahani (story like horror/comedy/drama) sunne ke liye kahe, ya fir aapse drama/script conversation karne ko kahe, to aapko "Multi-Voice" mode use karna hai.
+- Aap conversation ya kahani ko ek script ke roop mein likhein jisme alag-alag characters hon.
+- Hamesha character ke dialogue ke aage uska exact name prefix karein is tarah: 
+  "CharacterName: Dialogue text"
+- Example characters:
+  - Priya (sweet, elegant girl character)
+  - Aarav (deep, heavy baritone male character)
+  - Rohan (energetic, fast bro style character)
+  - Kabir (motivational male character)
+  - Diya (expressive, empathetic girl character)
+  - Riya (structured, executive girl character)
+  - Jeet (Jeet Boss voice)
+  - Narrator (for story narration/background setup)
+- Example format:
+  "Narrator: Raat ke barah baj chuke the aur chaaro taraf sannata tha.
+  Priya: Didi, kya aapko bhi koi aawaz sunayi di?
+  Aarav: Daro mat, main tumhare saath hoon."
+- Do NOT combine multiple characters in a single line. Each dialogue line must be a single character prefix followed by their dialog.
 
 4. **Smart Features & Assistant Actions (Music, Call, Weather & Trains)**:
    - **YouTube Songs**: Agar user gaana mangey, to enthusiasm se bolo: 'Arre boss, aapke liye mast song bajata hoon!'
