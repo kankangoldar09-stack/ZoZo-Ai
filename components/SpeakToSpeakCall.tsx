@@ -297,6 +297,7 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
         if (!live2dCanvasRef.current) return;
         
         cleanupLive2D();
+        console.log("[Live2D] Initializing for voice:", selectedVoice, "isAarav:", isAarav, "hasLive2DModel:", hasLive2DModel);
 
         const canvasEl = live2dCanvasRef.current;
         const container = canvasEl.parentElement;
@@ -421,8 +422,32 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
           core.setParameterValueById("ParamMouthOpenY", mouthOpen);
         });
 
-      } catch (err) {
-        console.error("Live2D init failed:", err);
+      } catch (err: any) {
+        console.error("[Live2D] Initialization failed:", err);
+        if (live2dCanvasRef.current) {
+          const container = live2dCanvasRef.current.parentElement;
+          if (container) {
+            // Remove any old error overlays first
+            const existing = container.querySelector('.live2d-error-overlay');
+            if (existing) existing.remove();
+            
+            const errDiv = document.createElement('div');
+            errDiv.className = 'live2d-error-overlay';
+            errDiv.style.position = 'absolute';
+            errDiv.style.color = '#ff4a4a';
+            errDiv.style.fontSize = '12px';
+            errDiv.style.fontWeight = 'bold';
+            errDiv.style.padding = '16px';
+            errDiv.style.textAlign = 'center';
+            errDiv.style.zIndex = '999';
+            errDiv.style.background = 'rgba(10,11,14,0.9)';
+            errDiv.style.border = '1px solid rgba(255,74,74,0.3)';
+            errDiv.style.borderRadius = '12px';
+            errDiv.style.margin = '20px';
+            errDiv.innerText = `Live2D Model failed to load for ${selectedVoice}. Error: ${err?.message || err || 'Unknown Error'}.`;
+            container.appendChild(errDiv);
+          }
+        }
       }
     };
 
