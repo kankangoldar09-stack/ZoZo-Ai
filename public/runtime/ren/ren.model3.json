@@ -35,7 +35,7 @@
 					"File": "motions/mtn_01.motion3.json"
 				}
 			],
-			"": [
+			"Tap": [
 				{
 					"File": "motions/mtn_02.motion3.json"
 				},
