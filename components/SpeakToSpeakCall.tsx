@@ -173,7 +173,8 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
   const isJeet = selectedVoice.toLowerCase() === 'jeet';
   const isAnanya = selectedVoice.toLowerCase() === 'ananya';
   const isDiya = selectedVoice.toLowerCase() === 'diya';
-  const hasLive2DModel = isPriya || isJeet || isAnanya || isDiya;
+  const isAarav = selectedVoice.toLowerCase() === 'aarav';
+  const hasLive2DModel = isPriya || isJeet || isAnanya || isDiya || isAarav;
 
   const isActiveRef = useRef(isActive);
   const isModelSpeakingRef = useRef(isModelSpeaking);
@@ -320,7 +321,7 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
           modelPath = '/runtime/natori_pro_t06.model3.json';
         } else if (isAnanya) {
           modelPath = '/runtime/miku/miku_sample_t04.model3.json';
-        } else if (isDiya) {
+        } else if (isDiya || isAarav) {
           modelPath = '/runtime/rice/rice_pro_t03.model3.json';
         }
 
@@ -356,7 +357,7 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
           scale = Math.min(scaleX, scaleY) * 1.28;
           anchorY = 0.40;
           offsetY = -12;
-        } else if (isDiya) {
+        } else if (isDiya || isAarav) {
           // Special scaling and offset adjustment for Rice model
           scale = Math.min(scaleX, scaleY) * 1.32;
           anchorY = 0.36;
@@ -612,6 +613,18 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
       }
     }
   };
+
+  // Sync isMuted state with micStream track status
+  useEffect(() => {
+    if (micStream) {
+      const audioTracks = micStream.getAudioTracks();
+      if (audioTracks.length > 0) {
+        setIsMuted(!audioTracks[0].enabled);
+      }
+    } else {
+      setIsMuted(false);
+    }
+  }, [micStream, isActive]);
 
   const formatTime = (secs: number) => {
     const mins = Math.floor(secs / 60);

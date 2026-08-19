@@ -696,6 +696,20 @@ const App: React.FC = () => {
               proc.onaudioprocess = (e) => {
                 if (sessionRef.current) {
                   const inputData = e.inputBuffer.getChannelData(0);
+
+                  // Foolproof mute check: if any track in mic is disabled, zero out the inputData buffer
+                  let isMuted = false;
+                  if (micStreamRef.current) {
+                    const tracks = micStreamRef.current.getAudioTracks();
+                    if (tracks.length > 0 && !tracks[0].enabled) {
+                      isMuted = true;
+                    }
+                  }
+
+                  if (isMuted) {
+                    inputData.fill(0);
+                  }
+
                   const pcmBlob = createBlob(inputData);
                   try {
                     sessionRef.current.sendRealtimeInput({
