@@ -321,8 +321,10 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
           modelPath = '/runtime/natori_pro_t06.model3.json';
         } else if (isAnanya) {
           modelPath = '/runtime/miku/miku_sample_t04.model3.json';
-        } else if (isDiya || isAarav) {
+        } else if (isDiya) {
           modelPath = '/runtime/rice/rice_pro_t03.model3.json';
+        } else if (isAarav) {
+          modelPath = '/runtime/ren/ren.model3.json';
         }
 
         const loadedModel = await Live2DModel.from(modelPath, {
@@ -357,10 +359,15 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
           scale = Math.min(scaleX, scaleY) * 1.28;
           anchorY = 0.40;
           offsetY = -12;
-        } else if (isDiya || isAarav) {
+        } else if (isDiya) {
           // Special scaling and offset adjustment for Rice model
           scale = Math.min(scaleX, scaleY) * 1.32;
           anchorY = 0.36;
+          offsetY = -15;
+        } else if (isAarav) {
+          // Special scaling and offset adjustment for Ren model
+          scale = Math.min(scaleX, scaleY) * 1.25;
+          anchorY = 0.38;
           offsetY = -15;
         }
         
