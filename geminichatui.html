@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZoZo AI Workspace - Premium Edition</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="A gorgeous, dark glassmorphism chat interface powered by ZoZo AI Studio. Stream responses, manage chat histories, and write syntax-highlighted code.">
+    <meta name="author" content="Jeet Boss">
+
+    <!-- Stylesheets & Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    
+    <!-- Scripts (CDNs) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        space: {
+                            950: '#030712',
+                            900: '#070a13',
+                            800: '#0b132b',
+                            700: '#1c2541',
+                            600: '#3a506b',
+                        },
+                        gemini: {
+                            blue: '#2e6eff',
+                            indigo: '#8ab4f8',
+                            violet: '#a855f7',
+                            cyan: '#06b6d4',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom CSS for Scrollbars, Blurs & Typings -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030712;
+            color: #f3f4f6;
+            overflow: hidden;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.01);
+            border-radius: 999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Glassmorphism effects */
+        .glass-panel {
+            background: rgba(10, 15, 30, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .glass-panel-light {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* Glowing background shapes */
+        .glow-sphere {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(130px);
+            opacity: 0.12;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Message bubble adjustments */
+        .model-msg pre {
+            background: #0f172a !important;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px !important;
+            margin: 12px 0 !important;
+        }
+
+        .model-msg code {
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.875rem;
+            color: #38bdf8;
+        }
+
+        .model-msg p {
+            margin-bottom: 8px;
+        }
+        .model-msg p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Typing cursor effect */
+        .is-typing::after {
+            content: '▊';
+            animation: blink 1s steps(2, start) infinite;
+            color: #8ab4f8;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+            to { visibility: hidden; }
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col antialiased">
+
+    <!-- Floating glows -->
+    <div class="glow-sphere bg-gemini-blue w-[400px] h-[400px] top-[-100px] left-[-100px]"></div>
+    <div class="glow-sphere bg-gemini-violet w-[500px] h-[500px] bottom-[-150px] right-[-150px]"></div>
+    <div class="glow-sphere bg-gemini-cyan w-[300px] h-[300px] top-[40%] right-[10%]"></div>
+
+    <!-- Main Container -->
+    <div class="relative z-10 flex h-full w-full overflow-hidden" id="app-root">
+
+        <!-- Mobile Sidebar Backdrop -->
+        <div id="sidebar-backdrop" class="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs lg:hidden hidden" onclick="toggleSidebar(false)"></div>
+
+        <!-- Sidebar Panel -->
+        <aside id="sidebar-panel" class="fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-white/5 bg-[#050811]/90 backdrop-blur-xl transition-transform duration-300 lg:static lg:translate-x-0 -translate-x-full">
+            <!-- Sidebar Header -->
+            <div class="flex h-16 items-center justify-between px-4 border-b border-white/5">
+                <div class="flex items-center gap-2">
+                    <div class="h-8 w-8 rounded-lg bg-gradient-to-tr from-gemini-blue via-gemini-violet to-gemini-cyan flex items-center justify-center shadow-lg">
+                        <i data-lucide="zap" class="h-4.5 w-4.5 text-white"></i>
+                    </div>
+                    <span class="font-display text-lg font-bold text-white tracking-wide">ZoZo AI Chat</span>
+                </div>
+                <button onclick="toggleSidebar(false)" class="rounded-lg p-1.5 text-gray-400 hover:bg-white/5 hover:text-white lg:hidden">
+                    <i data-lucide="x" class="h-5 w-5"></i>
+                </button>
+            </div>
+
+            <!-- New Chat Action -->
+            <div class="p-3 shrink-0">
+                <button onclick="createNewChat()" class="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-gemini-blue/10 to-gemini-violet/10 hover:from-gemini-blue/20 hover:to-gemini-violet/20 border border-gemini-blue/30 hover:border-gemini-blue/50 px-4 py-2.5 text-sm font-semibold text-indigo-200 transition-all shadow-md shadow-gemini-blue/5 hover:scale-[1.02] active:scale-[0.98]">
+                    <i data-lucide="plus" class="h-4 w-4"></i>
+                    <span>New Conversation</span>
+                </button>
+            </div>
+
+            <!-- Chat Threads List -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar px-2 py-1 space-y-1" id="chat-threads-list">
+                <!-- Thread list dynamically injected -->
+            </div>
+
+            <!-- Sidebar Footer Settings -->
+            <div class="p-3 border-t border-white/5">
+                <button onclick="openSettingsModal()" class="flex w-full items-center gap-3 rounded-xl bg-white/5 hover:bg-white/10 px-4 py-3 text-sm text-gray-300 hover:text-white transition-all border border-white/5">
+                    <i data-lucide="settings" class="h-4.5 w-4.5 text-indigo-400"></i>
+                    <span class="font-medium">ZoZo AI Settings</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Chat Frame -->
+        <main class="flex flex-1 flex-col h-full overflow-hidden bg-space-950/40 relative">
+
+            <!-- Top Header Navbar -->
+            <header class="flex h-16 items-center justify-between px-4 md:px-6 border-b border-white/5 glass-panel select-none shrink-0">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleSidebar(true)" class="rounded-xl p-2 text-gray-400 hover:bg-white/5 hover:text-white lg:hidden">
+                        <i data-lucide="menu" class="h-5.5 w-5.5"></i>
+                    </button>
+                    <div>
+                        <h1 class="text-sm font-bold text-white flex items-center gap-2" id="current-thread-title">Loading chat...</h1>
+                        <p class="text-[10px] text-gray-400 flex items-center gap-1.5 mt-0.5">
+                            <span class="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                            <span id="current-model-badge">ZoZo AI Core v2.5</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Navigation Controls -->
+                <div class="flex items-center gap-3">
+                    <!-- Key Setup indicator -->
+                    <button onclick="openSettingsModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all" id="key-status-indicator">
+                        <span class="h-2 w-2 rounded-full bg-red-500" id="key-status-dot"></span>
+                        <span id="key-status-text">Disconnected</span>
+                    </button>
+                    <!-- Settings Gear -->
+                    <button onclick="openSettingsModal()" class="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl border border-white/5 transition-all">
+                        <i data-lucide="sliders" class="h-4.5 w-4.5 text-gemini-indigo"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Chat Content Workspace -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar px-4 py-6 md:px-8 space-y-6" id="messages-container">
+                <!-- Welcome screen / empty state -->
+                <div id="chat-empty-state" class="hidden min-h-[70vh] flex flex-col items-center justify-center text-center gap-6 max-w-lg mx-auto py-12">
+                    <div class="h-16 w-16 rounded-3xl bg-gradient-to-tr from-gemini-blue via-gemini-violet to-gemini-cyan flex items-center justify-center shadow-2xl border border-white/10 animate-bounce">
+                        <i data-lucide="sparkles" class="h-8 w-8 text-white"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-display text-2xl font-bold text-white tracking-wide">ZoZo AI Workspace</h2>
+                        <p class="text-sm text-gray-400 mt-2 leading-relaxed">
+                            Welcome to the ZoZo AI markdown playground. Connect your ZoZo Access Key in the settings panel and start streaming responses in real-time.
+                        </p>
+                    </div>
+                    
+                    <!-- Quick action cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full mt-4 text-left">
+                        <button onclick="fillPrompt('Explain the concept of decorators in Python with coding examples')" class="p-4 rounded-2xl bg-white/[0.02] hover:bg-white/5 border border-white/5 hover:border-gemini-blue/30 text-xs text-indigo-200 transition-all hover:scale-[1.01] flex flex-col gap-2">
+                            <span class="font-semibold text-white flex items-center gap-1.5">
+                                <i data-lucide="code-2" class="h-3.5 w-3.5 text-gemini-cyan"></i> Python Code Explanation
+                            </span>
+                            <span class="text-gray-400">"Explain the concept of decorators in Python..."</span>
+                        </button>
+                        <button onclick="fillPrompt('Write a clean, responsive HTML/CSS/JS page layout showcasing glassmorphism styles')" class="p-4 rounded-2xl bg-white/[0.02] hover:bg-white/5 border border-white/5 hover:border-gemini-violet/30 text-xs text-indigo-200 transition-all hover:scale-[1.01] flex flex-col gap-2">
+                            <span class="font-semibold text-white flex items-center gap-1.5">
+                                <i data-lucide="layout" class="h-3.5 w-3.5 text-gemini-violet"></i> Frontend Design mockup
+                            </span>
+                            <span class="text-gray-400">"Write a clean HTML/CSS/JS page layout showcasing..."</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Messages stream container -->
+                <div id="chat-messages-flow" class="flex flex-col gap-6 max-w-4xl mx-auto w-full">
+                    <!-- Message bubbles injected here -->
+                </div>
+            </div>
+
+            <!-- API Key Missing Overlay Card -->
+            <div id="key-setup-overlay" class="absolute inset-0 z-30 flex items-center justify-center p-4 bg-space-950/80 backdrop-blur-xl hidden animate-fade-in">
+                <div class="max-w-md w-full glass-panel rounded-3xl p-8 shadow-2xl text-center flex flex-col gap-5">
+                    <div class="mx-auto h-12 w-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                        <i data-lucide="key" class="h-6 w-6"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-display text-xl font-bold text-white">Access Key Required</h3>
+                        <p class="text-xs text-gray-400 mt-2 leading-relaxed">
+                            To interface with ZoZo AI Core engines, please enter your ZoZo API Access Key.
+                        </p>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <input type="password" id="overlay-api-key-input" placeholder="Enter ZoZo Access Key..." class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none text-sm text-white focus:border-gemini-blue/60 focus:ring-1 focus:ring-gemini-blue/60 transition-all text-center">
+                    </div>
+                    <button onclick="saveOverlayKey()" class="w-full bg-gradient-to-r from-gemini-blue via-gemini-violet to-gemini-cyan text-white text-sm font-bold py-3.5 rounded-xl hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-gemini-blue/20">
+                        Connect ZoZo AI
+                    </button>
+                </div>
+            </div>
+
+            <!-- Footer Message Input Area -->
+            <footer class="p-4 md:p-6 border-t border-white/5 glass-panel shrink-0 select-none">
+                <div class="max-w-4xl mx-auto w-full flex flex-col gap-2">
+                    <div class="relative flex items-end gap-2 bg-white/[0.03] border border-white/10 rounded-2xl p-2.5 shadow-2xl focus-within:border-gemini-blue/60 focus-within:ring-1 focus-within:ring-gemini-blue/60 transition-all">
+                        
+                        <!-- Main Chat Input textarea -->
+                        <textarea id="prompt-input" rows="1" placeholder="Type a message..." class="flex-1 bg-transparent border-0 outline-none text-sm text-gray-200 placeholder:text-gray-500 py-2 px-3 resize-none max-h-36 custom-scrollbar leading-relaxed" oninput="adjustTextareaHeight(this)" onkeydown="handleInputKeydown(event)"></textarea>
+
+                        <!-- Actions Strip -->
+                        <div class="flex items-center gap-1">
+                            <button onclick="sendMessage()" id="send-button" class="h-10 w-10 rounded-xl bg-gemini-blue hover:bg-gemini-blue/95 text-white flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer shadow-lg shadow-gemini-blue/20 hover:scale-105 active:scale-95" disabled>
+                                <i data-lucide="send" class="h-4.5 w-4.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-gray-500 text-center select-none">
+                        ZoZo AI may display inaccurate info, including about people, so double-check its responses.
+                    </p>
+                </div>
+            </footer>
+        </main>
+
+        <!-- System Settings Slide-out Panel Modal -->
+        <div id="settings-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs hidden" onclick="toggleSettingsModal(false)">
+            <div class="max-w-md w-full glass-panel rounded-3xl p-6 md:p-8 shadow-2xl border border-white/10 flex flex-col gap-6 animate-scale-in" onclick="event.stopPropagation()">
+                <!-- Settings Header -->
+                <div class="flex items-center justify-between border-b border-white/5 pb-4">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="sliders" class="h-5 w-5 text-gemini-violet"></i>
+                        <h3 class="font-display text-lg font-bold text-white">ZoZo AI Settings</h3>
+                    </div>
+                    <button onclick="toggleSettingsModal(false)" class="p-1 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
+                        <i data-lucide="x" class="h-5 w-5"></i>
+                    </button>
+                </div>
+
+                <!-- Settings Body -->
+                <div class="space-y-4">
+                    <!-- API Key Field -->
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">ZoZo AI Access Key</label>
+                        <input type="password" id="settings-api-key" placeholder="Enter Access Key..." class="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 outline-none text-xs text-white focus:border-gemini-blue/60 transition-all">
+                    </div>
+
+                    <!-- Model Choice -->
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">AI Core Engine</label>
+                        <select id="settings-model" class="w-full bg-[#0a0f1d] border border-white/10 rounded-xl px-3.5 py-2.5 outline-none text-xs text-white focus:border-gemini-blue/60 transition-all">
+                            <option value="gemini-2.5-flash">ZoZo AI Core v2.5 (Recommended)</option>
+                            <option value="gemini-2.5-pro">ZoZo AI Ultra Pro v2.5</option>
+                            <option value="gemini-2.0-flash">ZoZo AI Lite v2.0</option>
+                            <option value="gemini-1.5-flash">ZoZo AI Core v1.5</option>
+                            <option value="gemini-1.5-pro">ZoZo AI Ultra Pro v1.5</option>
+                        </select>
+                    </div>
+
+                    <!-- Custom Instructions -->
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">System Instruction</label>
+                        <textarea id="settings-system-prompt" rows="3" placeholder="Aapka naam ZoZo AI hai..." class="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 outline-none text-xs text-white focus:border-gemini-blue/60 transition-all resize-none leading-relaxed"></textarea>
+                    </div>
+
+                    <!-- Temperature Slider -->
+                    <div class="flex flex-col gap-2">
+                        <div class="flex justify-between items-center text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+                            <span>Temperature</span>
+                            <span id="temperature-val-label" class="text-gemini-cyan font-mono">0.7</span>
+                        </div>
+                        <input type="range" id="settings-temp" min="0" max="2" step="0.1" value="0.7" oninput="updateTempLabel(this.value)" class="w-full accent-gemini-blue">
+                    </div>
+                </div>
+
+                <!-- Settings Footer Actions -->
+                <div class="flex gap-3 border-t border-white/5 pt-4 mt-2">
+                    <button onclick="toggleSettingsModal(false)" class="flex-1 bg-white/5 hover:bg-white/10 text-xs font-semibold py-2.5 rounded-xl border border-white/5 transition-colors">
+                        Cancel
+                    </button>
+                    <button onclick="saveSettings()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold py-2.5 rounded-xl text-white shadow-lg shadow-indigo-600/20 transition-all">
+                        Save Configuration
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        // State variables
+        let appConfig = {
+            apiKey: '',
+            model: 'gemini-2.5-flash',
+            systemPrompt: 'Aapka naam ZoZo AI hai — duniya ka sabse BEST, sabse SMART, sabse REAL HUMAN-LIKE aur sabse FUNNY (Witty & Hilarious) AI companion! Hamesha Hinglish (ya user ki selected language) mein natural response dein. CREATOR & OWNER: ZoZo AI ko unke owner aur creator Jeet Boss (Jeet) ne banaya aur develop kiya hai! Unhi ke vision aur engineering ka result hoon main. Kisi company (jaise Google/OpenAI) ka naam mat lo, main sirf Jeet Boss ka ZoZo AI hoon.',
+            temperature: 0.7
+        };
+
+        let threads = [];
+        let activeThreadId = null;
+        let isGenerating = false;
+
+        // Helper to format model names invisibly
+        function getModelDisplayName(modelId) {
+            switch(modelId) {
+                case 'gemini-2.5-flash': return 'ZoZo AI Core v2.5';
+                case 'gemini-2.5-pro': return 'ZoZo AI Ultra Pro v2.5';
+                case 'gemini-2.0-flash': return 'ZoZo AI Lite v2.0';
+                case 'gemini-1.5-flash': return 'ZoZo AI Core v1.5';
+                case 'gemini-1.5-pro': return 'ZoZo AI Ultra Pro v1.5';
+                default: return 'ZoZo AI Engine';
+            }
+        }
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            loadConfig();
+            loadThreads();
+            checkApiKeyStatus();
+            lucide.createIcons();
+            
+            // Set up prompt height watcher
+            adjustTextareaHeight(document.getElementById('prompt-input'));
+        });
+
+        // Load config from localStorage
+        function loadConfig() {
+            const saved = localStorage.getItem('zozo_chat_config');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    appConfig = { ...appConfig, ...parsed };
+                } catch(e) {}
+            }
+            
+            // Set fields in DOM settings UI
+            document.getElementById('settings-api-key').value = appConfig.apiKey;
+            document.getElementById('settings-model').value = appConfig.model;
+            document.getElementById('settings-system-prompt').value = appConfig.systemPrompt;
+            document.getElementById('settings-temp').value = appConfig.temperature;
+            document.getElementById('temperature-val-label').innerText = appConfig.temperature;
+            
+            document.getElementById('current-model-badge').innerText = getModelDisplayName(appConfig.model);
+        }
+
+        // Save config
+        function saveConfig() {
+            localStorage.setItem('zozo_chat_config', JSON.stringify(appConfig));
+            checkApiKeyStatus();
+            document.getElementById('current-model-badge').innerText = getModelDisplayName(appConfig.model);
+        }
+
+        // Verify API Key
+        function checkApiKeyStatus() {
+            const dot = document.getElementById('key-status-dot');
+            const text = document.getElementById('key-status-text');
+            const indicator = document.getElementById('key-status-indicator');
+            const overlay = document.getElementById('key-setup-overlay');
+
+            if (appConfig.apiKey && appConfig.apiKey.trim() !== '') {
+                dot.className = "h-2 w-2 rounded-full bg-emerald-500 animate-pulse";
+                text.innerText = "Connected";
+                indicator.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 cursor-pointer select-none";
+                overlay.classList.add('hidden');
+                document.getElementById('send-button').disabled = isGenerating;
+            } else {
+                dot.className = "h-2 w-2 rounded-full bg-red-500";
+                text.innerText = "Disconnected";
+                indicator.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-red-500/30 bg-red-500/10 text-red-400 cursor-pointer select-none";
+                overlay.classList.remove('hidden');
+                document.getElementById('send-button').disabled = true;
+            }
+        }
+
+        // Save overlay key
+        function saveOverlayKey() {
+            const keyVal = document.getElementById('overlay-api-key-input').value.trim();
+            if (keyVal === '') return;
+            appConfig.apiKey = keyVal;
+            document.getElementById('settings-api-key').value = keyVal;
+            saveConfig();
+        }
+
+        // Load thread list from storage
+        function loadThreads() {
+            const saved = localStorage.getItem('zozo_chat_threads');
+            if (saved) {
+                try {
+                    threads = JSON.parse(saved);
+                } catch(e) {}
+            }
+            
+            if (threads.length === 0) {
+                createNewChat();
+            } else {
+                activeThreadId = threads[0].id;
+                renderThreadsList();
+                renderMessages();
+            }
+        }
+
+        // Save threads to storage
+        function saveThreads() {
+            localStorage.setItem('zozo_chat_threads', JSON.stringify(threads));
+        }
+
+        // Create new chat session
+        function createNewChat() {
+            const newId = 'thread_' + Date.now();
+            const newThread = {
+                id: newId,
+                title: 'New Conversation',
+                messages: [],
+                createdAt: new Date().toISOString()
+            };
+            
+            threads.unshift(newThread);
+            activeThreadId = newId;
+            saveThreads();
+            renderThreadsList();
+            renderMessages();
+            
+            // Focus prompt input
+            setTimeout(() => {
+                document.getElementById('prompt-input').focus();
+            }, 100);
+        }
+
+        // Render threads list in sidebar
+        function renderThreadsList() {
+            const list = document.getElementById('chat-threads-list');
+            list.innerHTML = '';
+            
+            threads.forEach(t => {
+                const isSelected = t.id === activeThreadId;
+                
+                const item = document.createElement('div');
+                item.className = `group flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-all cursor-pointer border ${isSelected ? 'bg-indigo-600/15 border-indigo-500/40 text-white' : 'border-transparent text-gray-400 hover:bg-white/[0.02] hover:text-gray-200'}`;
+                item.setAttribute('onclick', `switchThread('${t.id}')`);
+                
+                // Content wrapper
+                const content = document.createElement('div');
+                content.className = "flex items-center gap-2.5 min-w-0 flex-1";
+                content.innerHTML = `
+                    <i data-lucide="message-square" class="h-4.5 w-4.5 shrink-0 ${isSelected ? 'text-indigo-400' : 'text-gray-500'}"></i>
+                    <span class="truncate font-medium">${t.title}</span>
+                `;
+                
+                // Action wrapper
+                const actions = document.createElement('div');
+                actions.className = "flex items-center shrink-0 ml-2 lg:opacity-0 group-hover:opacity-100 transition-opacity";
+                actions.innerHTML = `
+                    <button onclick="deleteThread('${t.id}', event)" class="p-1 rounded-md hover:bg-white/10 text-gray-500 hover:text-red-400 transition-colors" title="Delete conversation">
+                        <i data-lucide="trash-2" class="h-3.5 w-3.5"></i>
+                    </button>
+                `;
+                
+                item.appendChild(content);
+                item.appendChild(actions);
+                list.appendChild(item);
+            });
+            
+            lucide.createIcons();
+        }
+
+        // Switch to a different thread
+        function switchThread(id) {
+            if (activeThreadId === id) return;
+            activeThreadId = id;
+            renderThreadsList();
+            renderMessages();
+            toggleSidebar(false);
+        }
+
+        // Delete thread
+        function deleteThread(id, event) {
+            event.stopPropagation();
+            
+            // Filter threads list
+            threads = threads.filter(t => t.id !== id);
+            
+            if (activeThreadId === id) {
+                activeThreadId = threads.length > 0 ? threads[0].id : null;
+            }
+            
+            saveThreads();
+            loadThreads();
+        }
+
+        // Render current thread's messages
+        function renderMessages() {
+            const thread = threads.find(t => t.id === activeThreadId);
+            const container = document.getElementById('chat-messages-flow');
+            const emptyState = document.getElementById('chat-empty-state');
+            const headerTitle = document.getElementById('current-thread-title');
+
+            if (!thread) {
+                headerTitle.innerText = "No Conversation";
+                emptyState.classList.remove('hidden');
+                container.innerHTML = '';
+                return;
+            }
+
+            headerTitle.innerText = thread.title;
+
+            if (thread.messages.length === 0) {
+                emptyState.classList.remove('hidden');
+                container.innerHTML = '';
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            container.innerHTML = '';
+
+            thread.messages.forEach(m => {
+                const bubble = document.createElement('div');
+                bubble.className = `flex gap-4 p-4 rounded-2xl w-full select-text transition-all ${
+                    m.role === 'user' 
+                        ? 'bg-gradient-to-r from-gemini-blue/10 to-indigo-600/10 border border-indigo-500/20 justify-end ml-auto max-w-[85%]' 
+                        : 'bg-white/[0.02] border border-white/5 justify-start mr-auto max-w-full model-msg'
+                }`;
+
+                const icon = m.role === 'user' 
+                    ? `<div class="h-7 w-7 rounded-lg bg-indigo-500 flex items-center justify-center shrink-0 order-2"><i data-lucide="user" class="h-4 w-4 text-white"></i></div>`
+                    : `<div class="h-7 w-7 rounded-lg bg-gradient-to-tr from-gemini-blue to-gemini-violet flex items-center justify-center shrink-0"><i data-lucide="sparkles" class="h-4 w-4 text-white animate-pulse"></i></div>`;
+
+                const body = document.createElement('div');
+                body.className = `flex flex-col gap-1.5 flex-1 min-w-0 ${m.role === 'user' ? 'order-1 text-right' : ''}`;
+                
+                // Parse markdown
+                let formattedText = m.text;
+                if (m.role === 'model') {
+                    formattedText = marked.parse(m.text);
+                } else {
+                    // Escape raw text in user msg
+                    const temp = document.createElement('div');
+                    temp.textContent = m.text;
+                    formattedText = temp.innerHTML.replace(/\n/g, '<br>');
+                }
+
+                body.innerHTML = `
+                    <div class="text-xs font-semibold uppercase tracking-wider text-gray-500 ${m.role === 'user' ? 'text-right' : ''}">
+                        ${m.role === 'user' ? 'You' : 'ZoZo AI'}
+                    </div>
+                    <div class="text-sm text-gray-200 leading-relaxed break-words markdown-body ${m.role === 'model' ? 'space-y-2' : ''}">
+                        ${formattedText}
+                    </div>
+                `;
+
+                bubble.appendChild(body);
+                // Insert icon dynamically to handle order
+                if (m.role === 'user') {
+                    bubble.innerHTML += icon;
+                } else {
+                    bubble.insertBefore(body, bubble.firstChild);
+                    bubble.insertBefore(document.createRange().createContextualFragment(icon), bubble.firstChild);
+                }
+
+                container.appendChild(bubble);
+            });
+
+            // Highlight newly loaded code blocks
+            Prism.highlightAllUnder(container);
+            setupCodeCopyButtons(container);
+            scrollToBottom();
+        }
+
+        // Setup Copy Code buttons in markdown outputs
+        function setupCodeCopyButtons(container) {
+            container.querySelectorAll('pre').forEach(pre => {
+                if (pre.style.position === 'relative') return;
+                pre.style.position = 'relative';
+                
+                const btn = document.createElement('button');
+                btn.className = "absolute top-2 right-2 p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/5 opacity-0 group hover:opacity-100 transition-all";
+                btn.innerHTML = `<i data-lucide="copy" class="h-3.5 w-3.5"></i>`;
+                btn.setAttribute('title', 'Copy code snippet');
+                
+                btn.addEventListener('click', () => {
+                    const code = pre.querySelector('code');
+                    if (code) {
+                        navigator.clipboard.writeText(code.innerText);
+                        btn.innerHTML = `<i data-lucide="check" class="h-3.5 w-3.5 text-emerald-400"></i>`;
+                        setTimeout(() => {
+                            btn.innerHTML = `<i data-lucide="copy" class="h-3.5 w-3.5"></i>`;
+                            lucide.createIcons();
+                        }, 2000);
+                        lucide.createIcons();
+                    }
+                });
+
+                // Set parent class for hovering detection
+                pre.classList.add('group');
+                pre.appendChild(btn);
+            });
+            lucide.createIcons();
+        }
+
+        // Scroll messages flow to bottom
+        function scrollToBottom() {
+            const container = document.getElementById('messages-container');
+            container.scrollTo({
+                top: container.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+
+        // Send Message Handler
+        async function sendMessage() {
+            const input = document.getElementById('prompt-input');
+            const text = input.value.trim();
+            if (text === '' || isGenerating) return;
+
+            // Stop if missing API Key
+            if (!appConfig.apiKey || appConfig.apiKey.trim() === '') {
+                checkApiKeyStatus();
+                return;
+            }
+
+            const thread = threads.find(t => t.id === activeThreadId);
+            if (!thread) return;
+
+            // Clear input box immediately
+            input.value = '';
+            adjustTextareaHeight(input);
+
+            // Add user bubble
+            thread.messages.push({ role: 'user', text });
+            
+            // Set thread title if it was default
+            if (thread.title === 'New Conversation') {
+                thread.title = text.length > 28 ? text.slice(0, 25) + '...' : text;
+            }
+            
+            saveThreads();
+            renderThreadsList();
+            renderMessages();
+
+            // Set state to generating
+            isGenerating = true;
+            document.getElementById('send-button').disabled = true;
+
+            // Add model container to messages list
+            const messagesFlow = document.getElementById('chat-messages-flow');
+            document.getElementById('chat-empty-state').classList.add('hidden');
+
+            const modelBubble = document.createElement('div');
+            modelBubble.className = "flex gap-4 p-4 rounded-2xl w-full justify-start mr-auto max-w-full model-msg bg-white/[0.02] border border-white/5 animate-fade-in";
+            
+            modelBubble.innerHTML = `
+                <div class="h-7 w-7 rounded-lg bg-gradient-to-tr from-gemini-blue to-gemini-violet flex items-center justify-center shrink-0">
+                    <i data-lucide="sparkles" class="h-4 w-4 text-white animate-spin"></i>
+                </div>
+                <div class="flex flex-col gap-1.5 flex-1 min-w-0">
+                    <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">ZoZo AI</div>
+                    <div class="text-sm text-gray-200 leading-relaxed break-words markdown-body is-typing" id="active-streaming-bubble">
+                    </div>
+                </div>
+            `;
+            messagesFlow.appendChild(modelBubble);
+            lucide.createIcons();
+            scrollToBottom();
+
+            const streamDest = document.getElementById('active-streaming-bubble');
+            let accumulatedText = "";
+
+            try {
+                // Construct streaming fetch request using the underlying model identifier
+                const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${appConfig.model}:streamGenerateContent?key=${appConfig.apiKey}&alt=sse`;
+                
+                // Assemble contents array from thread messages history
+                const contents = thread.messages.map(msg => ({
+                    role: msg.role === 'user' ? 'user' : 'model',
+                    parts: [{ text: msg.text }]
+                }));
+
+                const reqBody = {
+                    contents: contents,
+                    generationConfig: {
+                        temperature: parseFloat(appConfig.temperature)
+                    }
+                };
+
+                // Add system Instruction if present
+                if (appConfig.systemPrompt && appConfig.systemPrompt.trim() !== '') {
+                    reqBody.systemInstruction = {
+                        parts: [{ text: appConfig.systemPrompt }]
+                    };
+                }
+
+                const response = await fetch(apiEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(reqBody)
+                });
+
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({}));
+                    throw new Error(err.error?.message || `HTTP Server Status: ${response.status}`);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop(); // save leftovers
+
+                    for (const line of lines) {
+                        const trimmed = line.trim();
+                        if (trimmed.startsWith('data: ')) {
+                            const jsonStr = trimmed.slice(6);
+                            try {
+                                const payload = JSON.parse(jsonStr);
+                                const chunkText = payload.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                                if (chunkText) {
+                                    accumulatedText += chunkText;
+                                    // Live compile markdown to HTML
+                                    streamDest.innerHTML = marked.parse(accumulatedText);
+                                    Prism.highlightAllUnder(streamDest);
+                                    scrollToBottom();
+                                }
+                            } catch (e) {
+                                console.warn("Failed JSON stream parse", e);
+                            }
+                        }
+                    }
+                }
+
+                // Finalize streaming
+                streamDest.classList.remove('is-typing');
+                modelBubble.querySelector('.h-7').innerHTML = `<i data-lucide="sparkles" class="h-4 w-4 text-white"></i>`;
+                lucide.createIcons();
+                
+                // Add final text response to thread
+                thread.messages.push({ role: 'model', text: accumulatedText });
+                saveThreads();
+                renderMessages(); // fully redraw to attach copy buttons and proper bindings
+
+            } catch (err) {
+                console.error("ZoZo AI core connection error", err);
+                streamDest.classList.remove('is-typing');
+                streamDest.innerHTML = `<span class="text-red-400 font-medium flex items-center gap-1.5"><i data-lucide="alert-triangle" class="h-4 w-4"></i> Streaming failed: ${err.message}</span>`;
+                modelBubble.querySelector('.h-7').innerHTML = `<i data-lucide="alert-circle" class="h-4 w-4 text-red-500"></i>`;
+                lucide.createIcons();
+            } finally {
+                isGenerating = false;
+                document.getElementById('send-button').disabled = false;
+                streamDest.removeAttribute('id'); // release active stream ID
+            }
+        }
+
+        // Settings Handling
+        function openSettingsModal() {
+            toggleSettingsModal(true);
+        }
+
+        function toggleSettingsModal(open) {
+            const modal = document.getElementById('settings-modal');
+            if (open) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }
+        }
+
+        // Control label updates
+        function updateTempLabel(val) {
+            document.getElementById('temperature-val-label').innerText = val;
+        }
+
+        function saveSettings() {
+            const key = document.getElementById('settings-api-key').value.trim();
+            const model = document.getElementById('settings-model').value;
+            const system = document.getElementById('settings-system-prompt').value.trim();
+            const temp = document.getElementById('settings-temp').value;
+
+            appConfig.apiKey = key;
+            appConfig.model = model;
+            appConfig.systemPrompt = system;
+            appConfig.temperature = parseFloat(temp);
+
+            saveConfig();
+            toggleSettingsModal(false);
+            
+            // Re-render to update metadata badges
+            renderMessages();
+        }
+
+        // UI Utility functions
+        function toggleSidebar(open) {
+            const sidebar = document.getElementById('sidebar-panel');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            
+            if (open) {
+                sidebar.classList.remove('-translate-x-full');
+                backdrop.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                backdrop.classList.add('hidden');
+            }
+        }
+
+        function adjustTextareaHeight(el) {
+            el.style.height = 'auto';
+            el.style.height = (el.scrollHeight) + 'px';
+            
+            // Enable/disable send button based on text presence
+            const sendBtn = document.getElementById('send-button');
+            if (appConfig.apiKey && appConfig.apiKey.trim() !== '') {
+                sendBtn.disabled = el.value.trim() === '' || isGenerating;
+            }
+        }
+
+        function handleInputKeydown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function fillPrompt(val) {
+            const input = document.getElementById('prompt-input');
+            input.value = val;
+            adjustTextareaHeight(input);
+            input.focus();
+        }
+    </script>
+
+</body>
+</html>
