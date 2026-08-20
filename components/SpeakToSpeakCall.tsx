@@ -197,70 +197,7 @@ export const SpeakToSpeakCall: React.FC<SpeakToSpeakCallProps> = ({
     isMutedRef.current = isMuted;
   }, [isMuted]);
 
-  // Background speech recognition for triggering waving motion on "hello"
-  useEffect(() => {
-    if (!isActive || !hasLive2DModel) return;
-
-    const SpeechRecognition =
-      (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition;
-
-    if (!SpeechRecognition) return;
-
-    let recognition: any = null;
-    try {
-      recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = "hi-IN"; // Supports both Hindi and English greetings
-
-      recognition.onresult = (event: any) => {
-        if (isMutedRef.current) return;
-        const lastResultIndex = event.results.length - 1;
-        const transcript = event.results[lastResultIndex][0].transcript.toLowerCase();
-        
-        // Check for common greetings
-        if (
-          transcript.includes("hello") || 
-          transcript.includes("hi") || 
-          transcript.includes("hey") || 
-          transcript.includes("namaste") ||
-          transcript.includes("hallo")
-        ) {
-          if (live2DModelRef.current) {
-            // Trigger FlickLeft (waving/greeting animation for Live2D models)
-            live2DModelRef.current.motion("FlickLeft");
-          }
-        }
-      };
-
-      recognition.onerror = (e: any) => {
-        console.warn("Background speech recognition error:", e);
-      };
-
-      recognition.onend = () => {
-        // Restart recognition if call is still active
-        if (isActiveRef.current && recognition) {
-          try {
-            recognition.start();
-          } catch (err) {}
-        }
-      };
-
-      recognition.start();
-    } catch (err) {
-      console.warn("Could not start background SpeechRecognition:", err);
-    }
-
-    return () => {
-      if (recognition) {
-        try {
-          recognition.onend = null;
-          recognition.stop();
-        } catch (e) {}
-      }
-    };
-  }, [isActive, hasLive2DModel]);
+  // Background speech recognition for hello waving has been removed to prevent duplicate microphone usage and repetitive Google Speech Recognition chime beeps.
 
   const cleanupLive2D = () => {
     if (live2DModelRef.current) {
