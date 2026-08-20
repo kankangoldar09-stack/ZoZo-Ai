@@ -1713,11 +1713,11 @@ Formatting:
 
   const renderInputBar = () => {
     return (
-      <div className="bg-white dark:bg-[#1e1f20] border border-white/10 focus-within:border-[#2e6eff]/50 focus-within:ring-1 focus-within:ring-[#2e6eff]/30 shadow-2xl rounded-2xl p-2 md:p-3 flex items-end gap-2 backdrop-blur-xl transition-all">
+      <div className="bg-white dark:bg-[#1e1f20] border border-white/10 focus-within:border-[#2e6eff]/50 focus-within:ring-1 focus-within:ring-[#2e6eff]/30 shadow-2xl rounded-[28px] p-1.5 md:p-2.5 flex items-end gap-2 backdrop-blur-xl transition-all">
         {/* 3-Points / 3-Dots Drawer Trigger Button in Input Bar */}
         <button
           onClick={() => setIsDrawerOpen(true)}
-          className="p-2.5 rounded-xl transition-all shrink-0 bg-white/5 hover:bg-white/10 text-[#7bddff] border border-white/10"
+          className="p-2.5 rounded-full transition-all shrink-0 bg-white/5 hover:bg-white/10 text-[#7bddff] border border-white/10 flex items-center justify-center"
           title="Open Options Drawer (Gallery, Voice, Plugins, New Chat, Features)"
         >
           <MoreVertical className="w-4 h-4" />
@@ -1740,7 +1740,7 @@ Formatting:
             }
           }}
           placeholder="Ask me ZoZoAI..."
-          className="flex-1 bg-transparent outline-none text-[#e3e3e3] placeholder:text-[#9aa0a6] py-1.5 resize-none max-h-36 custom-scrollbar text-sm"
+          className="flex-1 bg-transparent outline-none text-[#e3e3e3] placeholder:text-[#9aa0a6] py-2 px-2 resize-none max-h-36 custom-scrollbar text-sm leading-relaxed"
           disabled={isSearching || isGeneratingImage}
         />
 
@@ -1753,7 +1753,7 @@ Formatting:
             isGeneratingImage ||
             isStreaming
           }
-          className={`p-2.5 rounded-xl transition-all shrink-0 font-bold ${
+          className={`p-2.5 rounded-full transition-all shrink-0 font-bold flex items-center justify-center ${
             chatInput.trim()
               ? "bg-[#2e6eff] hover:bg-[#255fd9] text-white shadow-lg shadow-[#2e6eff]/30 cursor-pointer"
               : "text-[#5f6368] bg-white/5 cursor-not-allowed"
@@ -1784,23 +1784,18 @@ Formatting:
         </div>
 
         {/* Header Controls */}
-        <div className="flex items-center gap-2 md:gap-3">
+        <div className="flex items-center gap-1.5 md:gap-2">
           {/* Quick Call AI Button (Full Size Voice-to-Voice) */}
           <button
             onClick={() => {
               setIsSpeakToSpeakOpen(true);
               if (!isActive) startLiveSession();
             }}
-            className="flex items-center gap-2 py-2 px-3.5 md:px-4 rounded-xl bg-gradient-to-r from-[#2e6eff] via-[#3b82f6] to-[#7bddff] text-white font-bold text-xs shadow-lg shadow-[#2e6eff]/30 hover:scale-105 active:scale-95 transition-all border border-white/20"
+            className="flex items-center gap-1.5 py-2 px-2.5 md:px-4 rounded-xl bg-gradient-to-r from-[#2e6eff] via-[#3b82f6] to-[#7bddff] text-white font-bold text-xs shadow-lg shadow-[#2e6eff]/30 hover:scale-105 active:scale-95 transition-all border border-white/20"
             title="Open Full-Size Live Voice Call with ZoZo AI"
           >
-            <div className="w-5 h-5 rounded-lg bg-white/20 flex items-center justify-center">
-              <Phone className="w-3 h-3 fill-current animate-pulse" />
-            </div>
-            <span className="tracking-wide">Live Voice Call</span>
-            <span className="hidden md:inline-block px-1.5 py-0.2 rounded text-[9px] bg-white/20 font-mono uppercase">
-              Full Size
-            </span>
+            <Phone className="w-3.5 h-3.5 fill-current animate-pulse shrink-0" />
+            <span className="tracking-wide hidden md:inline">Voice Call</span>
           </button>
 
           {/* Voice Mute Toggle Button */}
@@ -1811,7 +1806,7 @@ Formatting:
                 stopAllSpeech();
               }
             }}
-            className="p-2 md:px-3 md:py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center gap-1.5 transition-all shadow-md"
+            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center transition-all shadow-md"
             title={isVoiceEnabled ? "Mute Assistant Voice" : "Unmute Assistant Voice"}
           >
             {isVoiceEnabled ? (
@@ -1819,21 +1814,17 @@ Formatting:
             ) : (
               <VolumeX className="w-4 h-4 text-red-400" />
             )}
-            <span className="hidden sm:inline text-xs font-semibold text-[#e3e3e3]">
-              {isVoiceEnabled ? "Mute" : "Unmute"}
-            </span>
           </button>
 
           {/* 3-Points / 3-Dots Drawer Trigger Button */}
           <button
             onClick={() => setIsDrawerOpen(true)}
-            className="p-2 md:px-3 md:py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center gap-1.5 transition-all shadow-md group"
+            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center transition-all shadow-md group relative"
             title="More Options (Gallery, Voice, Plugins, Settings)"
           >
             <MoreVertical className="w-4 h-4 text-[#7bddff] group-hover:rotate-90 transition-transform duration-200" />
-            <span className="hidden sm:inline text-xs font-semibold text-[#e3e3e3]">Options</span>
             {gallery.length > 0 && (
-              <span className="w-2 h-2 rounded-full bg-[#7bddff] animate-pulse"></span>
+              <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-[#7bddff] animate-pulse"></span>
             )}
           </button>
         </div>
@@ -1930,11 +1921,11 @@ Formatting:
                       <div
                         className={
                           m.role === "user"
-                            ? "user-msg bg-gradient-to-r from-[#2e6eff]/10 to-[#8ab4f8]/10 border border-[#2e6eff]/20 text-[#e3e3e3] px-4 py-3 rounded-2xl shadow-md backdrop-blur-xs select-text"
-                            : "model-msg bg-white/[0.02] border border-white/5 p-4 md:p-5 rounded-2xl shadow-lg backdrop-blur-xs select-text"
+                            ? "user-msg bg-gradient-to-r from-[#2e6eff]/10 to-[#8ab4f8]/10 border border-[#2e6eff]/20 text-[#e3e3e3] px-3.5 py-2.5 md:px-5 md:py-3 rounded-2xl shadow-md backdrop-blur-xs select-text text-sm md:text-[0.92rem]"
+                            : "model-msg bg-white/[0.02] border border-white/5 p-3.5 md:p-5 rounded-2xl shadow-lg backdrop-blur-xs select-text text-sm md:text-[0.92rem]"
                         }
                       >
-                        <div className="markdown-body text-[0.92rem] leading-relaxed text-[#e3e3e3]">
+                        <div className="markdown-body text-sm md:text-[0.92rem] leading-relaxed text-[#e3e3e3]">
                           <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
                             components={{
@@ -2038,8 +2029,8 @@ Formatting:
                     <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#2e6eff] to-[#7bddff] flex items-center justify-center shrink-0 mt-1 shadow-md">
                       <Zap className="w-4 h-4 text-white" fill="currentColor" />
                     </div>
-                    <div className="model-msg bg-white/[0.02] border border-white/5 p-4 md:p-5 rounded-2xl shadow-lg max-w-[85%] md:max-w-[80%] backdrop-blur-xs select-text">
-                      <div className="markdown-body text-[0.92rem] text-[#e3e3e3] is-typing">
+                    <div className="model-msg bg-white/[0.02] border border-white/5 p-3.5 md:p-5 rounded-2xl shadow-lg max-w-[85%] md:max-w-[80%] backdrop-blur-xs select-text">
+                      <div className="markdown-body text-sm md:text-[0.92rem] text-[#e3e3e3] is-typing">
                         <ReactMarkdown 
                           remarkPlugins={[remarkGfm]}
                           components={{
@@ -2107,31 +2098,31 @@ Formatting:
             {messages.length > 0 && (
               <div className="py-2 md:py-3 shrink-0 flex flex-col gap-2 animate-fade-in">
                 {/* Quick Feature Shortcut Pills Strip */}
-                <div className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1 px-1">
+                <div className="flex items-center gap-1.5 overflow-x-auto snap-x scrollbar-none pb-1 px-1 [&::-webkit-scrollbar]:hidden">
                   <button
                     onClick={() => setIsYouTubeModalOpen(true)}
-                    className="px-2.5 py-1 rounded-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-300 text-[11px] font-semibold flex items-center gap-1.5 shrink-0 transition-all shadow-sm"
+                    className="px-2.5 py-1 rounded-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-300 text-[11px] font-semibold flex items-center gap-1.5 shrink-0 snap-start transition-all shadow-sm"
                   >
                     <Play className="w-3 h-3 fill-current text-red-400" />
                     <span>YouTube Songs</span>
                   </button>
                   <button
                     onClick={() => setIsPhoneModalOpen(true)}
-                    className="px-2.5 py-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-300 text-[11px] font-semibold flex items-center gap-1.5 shrink-0 transition-all shadow-sm"
+                    className="px-2.5 py-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-300 text-[11px] font-semibold flex items-center gap-1.5 shrink-0 snap-start transition-all shadow-sm"
                   >
                     <PhoneCall className="w-3 h-3 text-emerald-400" />
                     <span>Phone Dialer</span>
                   </button>
                   <button
                     onClick={() => setIsWeatherModalOpen(true)}
-                    className="px-2.5 py-1 rounded-full bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 text-sky-300 text-[11px] font-semibold flex items-center gap-1.5 shrink-0 transition-all shadow-sm"
+                    className="px-2.5 py-1 rounded-full bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 text-sky-300 text-[11px] font-semibold flex items-center gap-1.5 shrink-0 snap-start transition-all shadow-sm"
                   >
                     <Sun className="w-3 h-3 text-sky-400" />
                     <span>Live Weather</span>
                   </button>
                   <button
                     onClick={() => setIsTrainModalOpen(true)}
-                    className="px-2.5 py-1 rounded-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 text-amber-300 text-[11px] font-semibold flex items-center gap-1.5 shrink-0 transition-all shadow-sm"
+                    className="px-2.5 py-1 rounded-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 text-amber-300 text-[11px] font-semibold flex items-center gap-1.5 shrink-0 snap-start transition-all shadow-sm"
                   >
                     <Train className="w-3 h-3 text-amber-400" />
                     <span>Train Tracker (IRCTC)</span>
