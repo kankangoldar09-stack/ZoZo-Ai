@@ -1711,8 +1711,62 @@ Formatting:
     );
   }
 
+  const renderInputBar = () => {
+    return (
+      <div className="bg-white dark:bg-[#1e1f20] border border-white/10 focus-within:border-[#2e6eff]/50 focus-within:ring-1 focus-within:ring-[#2e6eff]/30 shadow-2xl rounded-2xl p-2 md:p-3 flex items-end gap-2 backdrop-blur-xl transition-all">
+        {/* 3-Points / 3-Dots Drawer Trigger Button in Input Bar */}
+        <button
+          onClick={() => setIsDrawerOpen(true)}
+          className="p-2.5 rounded-xl transition-all shrink-0 bg-white/5 hover:bg-white/10 text-[#7bddff] border border-white/10"
+          title="Open Options Drawer (Gallery, Voice, Plugins, New Chat, Features)"
+        >
+          <MoreVertical className="w-4 h-4" />
+        </button>
+
+        {/* Textarea */}
+        <textarea
+          ref={textareaRef}
+          rows={1}
+          value={chatInput}
+          onChange={(e) => {
+            setChatInput(e.target.value);
+            e.target.style.height = "auto";
+            e.target.style.height = Math.min(e.target.scrollHeight, 160) + "px";
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleAction();
+            }
+          }}
+          placeholder="Ask me ZoZoAI..."
+          className="flex-1 bg-transparent outline-none text-[#e3e3e3] placeholder:text-[#9aa0a6] py-1.5 resize-none max-h-36 custom-scrollbar text-sm"
+          disabled={isSearching || isGeneratingImage}
+        />
+
+        {/* Send Button */}
+        <button
+          onClick={handleAction}
+          disabled={
+            !chatInput.trim() ||
+            isSearching ||
+            isGeneratingImage ||
+            isStreaming
+          }
+          className={`p-2.5 rounded-xl transition-all shrink-0 font-bold ${
+            chatInput.trim()
+              ? "bg-[#2e6eff] hover:bg-[#255fd9] text-white shadow-lg shadow-[#2e6eff]/30 cursor-pointer"
+              : "text-[#5f6368] bg-white/5 cursor-not-allowed"
+          }`}
+        >
+          <Send className="w-4 h-4" />
+        </button>
+      </div>
+    );
+  };
+
   return wrapWithDeviceFrame(
-    <div className="h-full w-full bg-[#0a0b0e] flex flex-col text-[#e3e3e3] overflow-hidden select-none relative">
+    <div className="h-full w-full bg-[#0c0c0c] flex flex-col text-[#e3e3e3] overflow-hidden select-none relative">
       {/* Dynamic Ambient Background Glow */}
       <div className="absolute top-[-15%] left-[-10%] w-[50%] h-[50%] bg-[#2e6eff]/10 blur-[150px] rounded-full pointer-events-none"></div>
       <div className="absolute bottom-[-15%] right-[-10%] w-[50%] h-[50%] bg-[#7bddff]/10 blur-[150px] rounded-full pointer-events-none"></div>
@@ -1793,22 +1847,23 @@ Formatting:
             <div className="flex-1 overflow-y-auto custom-scrollbar py-4 md:py-6">
               <div className="flex flex-col gap-5">
                 {messages.length === 0 && !isSearching && !isGeneratingImage && (
-                  <div className="min-h-[55vh] flex flex-col items-center justify-center text-center gap-6 p-4 animate-fade-in">
-                    <div className="w-18 h-18 rounded-3xl bg-gradient-to-tr from-[#2e6eff] to-[#7bddff] flex items-center justify-center shadow-2xl shadow-[#2e6eff]/30 border border-white/20">
-                      <Sparkles className="w-9 h-9 text-white animate-pulse" />
-                    </div>
-                    <div className="flex flex-col gap-2 max-w-lg">
-                      <h2 className="text-2xl font-black text-white tracking-tight flex items-center justify-center gap-2">
-                        <span>Namaste {getUserName()}!</span>
-                        <span className="inline-block animate-bounce">😄</span>
-                      </h2>
-                      <p className="text-sm text-[#9aa0a6] leading-relaxed">
-                        Main hoon <b>ZoZo AI</b> — duniya ka sabse <b>BEST, SMART aur FUNNY</b> AI companion! Bolo Boss, aaj kya scene hai?
-                      </p>
+                  <div className="min-h-[60vh] flex flex-col items-center justify-center text-center gap-6 px-4 py-8 animate-fade-in max-w-2xl mx-auto w-full relative">
+                    <h1 className="text-4xl font-normal text-[#1f1f1f] dark:text-white tracking-tight leading-tight select-none">
+                      How can I help you today?
+                    </h1>
+                    
+                    {/* Centered Glow-backed Input Box */}
+                    <div className="relative w-full mt-4 select-none">
+                      {/* Ambient Glow backing */}
+                      <div aria-hidden="true" className="pointer-events-none absolute top-1/2 left-1/2 h-[180px] w-[500px] max-w-[90%] -translate-x-1/2 -translate-y-1/2 rounded-[140px] bg-[#a9d1fb]/45 blur-[80px] dark:bg-[#1b2f9c]/35 z-0"></div>
+                      
+                      <div className="relative z-10 w-full">
+                        {renderInputBar()}
+                      </div>
                     </div>
 
                     {/* Quick Funny & Smart Prompt Cards */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-xl mt-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full mt-6 z-10">
                       {[
                         {
                           text: "Ek mast funny joke sunao bhai 🤣",
@@ -2049,89 +2104,43 @@ Formatting:
             </div>
 
             {/* Expansive Floating Chat Input Bar */}
-            <div className="py-2 md:py-3 shrink-0 flex flex-col gap-2">
-              {/* Quick Feature Shortcut Pills Strip */}
-              <div className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1 px-1">
-                <button
-                  onClick={() => setIsYouTubeModalOpen(true)}
-                  className="px-2.5 py-1 rounded-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-300 text-[11px] font-semibold flex items-center gap-1.5 shrink-0 transition-all shadow-sm"
-                >
-                  <Play className="w-3 h-3 fill-current text-red-400" />
-                  <span>YouTube Songs</span>
-                </button>
-                <button
-                  onClick={() => setIsPhoneModalOpen(true)}
-                  className="px-2.5 py-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-300 text-[11px] font-semibold flex items-center gap-1.5 shrink-0 transition-all shadow-sm"
-                >
-                  <PhoneCall className="w-3 h-3 text-emerald-400" />
-                  <span>Phone Dialer</span>
-                </button>
-                <button
-                  onClick={() => setIsWeatherModalOpen(true)}
-                  className="px-2.5 py-1 rounded-full bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 text-sky-300 text-[11px] font-semibold flex items-center gap-1.5 shrink-0 transition-all shadow-sm"
-                >
-                  <Sun className="w-3 h-3 text-sky-400" />
-                  <span>Live Weather</span>
-                </button>
-                <button
-                  onClick={() => setIsTrainModalOpen(true)}
-                  className="px-2.5 py-1 rounded-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 text-amber-300 text-[11px] font-semibold flex items-center gap-1.5 shrink-0 transition-all shadow-sm"
-                >
-                  <Train className="w-3 h-3 text-amber-400" />
-                  <span>Train Tracker (IRCTC)</span>
-                </button>
+            {messages.length > 0 && (
+              <div className="py-2 md:py-3 shrink-0 flex flex-col gap-2 animate-fade-in">
+                {/* Quick Feature Shortcut Pills Strip */}
+                <div className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1 px-1">
+                  <button
+                    onClick={() => setIsYouTubeModalOpen(true)}
+                    className="px-2.5 py-1 rounded-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-300 text-[11px] font-semibold flex items-center gap-1.5 shrink-0 transition-all shadow-sm"
+                  >
+                    <Play className="w-3 h-3 fill-current text-red-400" />
+                    <span>YouTube Songs</span>
+                  </button>
+                  <button
+                    onClick={() => setIsPhoneModalOpen(true)}
+                    className="px-2.5 py-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-300 text-[11px] font-semibold flex items-center gap-1.5 shrink-0 transition-all shadow-sm"
+                  >
+                    <PhoneCall className="w-3 h-3 text-emerald-400" />
+                    <span>Phone Dialer</span>
+                  </button>
+                  <button
+                    onClick={() => setIsWeatherModalOpen(true)}
+                    className="px-2.5 py-1 rounded-full bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 text-sky-300 text-[11px] font-semibold flex items-center gap-1.5 shrink-0 transition-all shadow-sm"
+                  >
+                    <Sun className="w-3 h-3 text-sky-400" />
+                    <span>Live Weather</span>
+                  </button>
+                  <button
+                    onClick={() => setIsTrainModalOpen(true)}
+                    className="px-2.5 py-1 rounded-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 text-amber-300 text-[11px] font-semibold flex items-center gap-1.5 shrink-0 transition-all shadow-sm"
+                  >
+                    <Train className="w-3 h-3 text-amber-400" />
+                    <span>Train Tracker (IRCTC)</span>
+                  </button>
+                </div>
+
+                {renderInputBar()}
               </div>
-
-              <div className="bg-white/[0.03] border border-white/10 focus-within:border-[#2e6eff]/50 focus-within:ring-1 focus-within:ring-[#2e6eff]/30 shadow-2xl rounded-2xl p-2 md:p-3 flex items-end gap-2 backdrop-blur-xl transition-all">
-                {/* 3-Points / 3-Dots Drawer Trigger Button in Input Bar */}
-                <button
-                  onClick={() => setIsDrawerOpen(true)}
-                  className="p-2.5 rounded-xl transition-all shrink-0 bg-white/5 hover:bg-white/10 text-[#7bddff] border border-white/10"
-                  title="Open Options Drawer (Gallery, Voice, Plugins, New Chat, Features)"
-                >
-                  <MoreVertical className="w-4 h-4" />
-                </button>
-
-                {/* Textarea */}
-                <textarea
-                  ref={textareaRef}
-                  rows={1}
-                  value={chatInput}
-                  onChange={(e) => {
-                    setChatInput(e.target.value);
-                    e.target.style.height = "auto";
-                    e.target.style.height = Math.min(e.target.scrollHeight, 160) + "px";
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleAction();
-                    }
-                  }}
-                  placeholder="Ask me ZoZoAI..."
-                  className="flex-1 bg-transparent outline-none text-[#e3e3e3] placeholder:text-[#9aa0a6] py-1.5 resize-none max-h-36 custom-scrollbar text-sm"
-                  disabled={isSearching || isGeneratingImage}
-                />
-
-                {/* Send Button */}
-                <button
-                  onClick={handleAction}
-                  disabled={
-                    !chatInput.trim() ||
-                    isSearching ||
-                    isGeneratingImage ||
-                    isStreaming
-                  }
-                  className={`p-2.5 rounded-xl transition-all shrink-0 font-bold ${
-                    chatInput.trim()
-                      ? "bg-[#2e6eff] hover:bg-[#255fd9] text-white shadow-lg shadow-[#2e6eff]/30 cursor-pointer"
-                      : "text-[#5f6368] bg-white/5 cursor-not-allowed"
-                  }`}
-                >
-                  <Send className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
+            )}
           </div>
         ) : (
           /* Full Screen Gallery View */
