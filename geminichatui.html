@@ -3,1818 +3,1256 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Gemini Ultra AI</title>
-  <meta name="description" content="Premium mobile-first Gemini AI chat interface with streaming responses, voice mode, and glassmorphism design." />
-
-  <!-- Fonts -->
+  <title>ZoZo AI — Premium Chat</title>
+  <meta name="description" content="Premium mobile AI chat powered by ZoZo AI — built by Jeet Boss." />
+  <meta name="theme-color" content="#07080b" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-
-  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Marked.js for Markdown -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <!-- Prism.js for Code Highlighting -->
   <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
-
   <style>
+    /* ═══════════════════════════════════════
+       DESIGN TOKENS
+    ═══════════════════════════════════════ */
     :root {
-      --bg-main: #07080b;
-      --bg-surface: #0f1117;
-      --bg-surface-elevated: #161922;
-      --bg-surface-glass: rgba(15, 17, 23, 0.88);
+      --bg-primary: #05060a;
+      --bg-card: #0c0e14;
+      --bg-elevated: #12141c;
+      --bg-glass: rgba(12, 14, 20, 0.92);
+      --bg-glass-light: rgba(255,255,255,0.03);
 
-      --gemini-gradient: linear-gradient(135deg, #4285f4 0%, #9b72cb 40%, #d96570 70%, #d946ef 100%);
-      --gemini-glow: rgba(155, 114, 203, 0.35);
-      --gemini-border-glow: linear-gradient(90deg, #4285f4, #9b72cb, #d96570, #4285f4);
+      --accent-1: #6366f1;
+      --accent-2: #a855f7;
+      --accent-3: #ec4899;
+      --accent-4: #3b82f6;
+      --gradient-main: linear-gradient(135deg, #6366f1 0%, #a855f7 35%, #ec4899 70%, #f43f5e 100%);
+      --gradient-subtle: linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(168,85,247,0.08) 100%);
+      --glow-color: rgba(139, 92, 246, 0.3);
 
-      --border-subtle: rgba(255, 255, 255, 0.08);
-      --border-bright: rgba(255, 255, 255, 0.15);
+      --border-dim: rgba(255,255,255,0.06);
+      --border-med: rgba(255,255,255,0.1);
+      --border-lit: rgba(255,255,255,0.16);
 
-      --text-primary: #f8fafc;
-      --text-secondary: #94a3b8;
-      --text-tertiary: #64748b;
+      --text-1: #f1f5f9;
+      --text-2: #94a3b8;
+      --text-3: #64748b;
+      --text-4: #475569;
 
-      --radius-sm: 10px;
-      --radius-md: 16px;
-      --radius-lg: 24px;
-      --radius-full: 9999px;
+      --r-xs: 8px;
+      --r-sm: 12px;
+      --r-md: 16px;
+      --r-lg: 22px;
+      --r-xl: 28px;
+      --r-full: 9999px;
 
-      --safe-top: env(safe-area-inset-top, 0px);
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --safe-t: env(safe-area-inset-top, 0px);
+      --safe-b: env(safe-area-inset-bottom, 0px);
+      --spring: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-
+    /* ═══════════════════════════════════════
+       RESET
+    ═══════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    * { -webkit-tap-highlight-color: transparent; }
     body {
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #000000;
-      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background: #000;
+      color: var(--text-1);
       height: 100dvh;
       width: 100vw;
       overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
+      -webkit-font-smoothing: antialiased;
       user-select: none;
     }
 
-    #app-container {
+    /* ═══════════════════════════════════════
+       APP SHELL
+    ═══════════════════════════════════════ */
+    #phone {
       width: 100%;
       height: 100dvh;
-      max-width: 460px;
-      background: var(--bg-main);
+      max-width: 430px;
+      background: var(--bg-primary);
       position: relative;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 0 80px rgba(0, 0, 0, 0.95);
     }
-
     @media (min-width: 500px) {
-      #app-container {
-        height: 94dvh;
-        border-radius: 36px;
-        border: 1px solid var(--border-subtle);
+      #phone {
+        height: 92dvh;
+        border-radius: 40px;
+        border: 1px solid var(--border-dim);
+        box-shadow:
+          0 0 0 1px rgba(255,255,255,0.04),
+          0 25px 60px -12px rgba(0,0,0,0.8),
+          0 0 100px -20px rgba(139, 92, 246, 0.15);
       }
     }
 
-    /* ──── Ambient Top Glow ──── */
-    .ambient-glow {
+    /* ═══════════════════════════════════════
+       AMBIENT EFFECTS
+    ═══════════════════════════════════════ */
+    .glow-top {
       position: absolute;
-      top: -100px;
+      top: -120px;
       left: 50%;
       transform: translateX(-50%);
-      width: 340px;
-      height: 220px;
-      background: radial-gradient(ellipse, var(--gemini-glow) 0%, rgba(0,0,0,0) 70%);
-      filter: blur(55px);
+      width: 360px;
+      height: 260px;
+      background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.25) 0%, rgba(236, 72, 153, 0.08) 40%, transparent 70%);
+      filter: blur(60px);
       pointer-events: none;
       z-index: 1;
-      animation: glowPulse 6s ease-in-out infinite alternate;
+      animation: glowBreath 5s ease-in-out infinite alternate;
     }
-    @keyframes glowPulse {
-      0% { opacity: 0.7; transform: translateX(-50%) scale(1); }
-      100% { opacity: 1; transform: translateX(-50%) scale(1.12); }
+    .glow-bottom {
+      position: absolute;
+      bottom: -80px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 300px;
+      height: 160px;
+      background: radial-gradient(ellipse, rgba(99, 102, 241, 0.12) 0%, transparent 70%);
+      filter: blur(50px);
+      pointer-events: none;
+      z-index: 1;
+    }
+    @keyframes glowBreath {
+      0% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+      100% { opacity: 1; transform: translateX(-50%) scale(1.15); }
     }
 
-    /* ──── Header ──── */
-    .app-header {
+    /* ═══════════════════════════════════════
+       HEADER
+    ═══════════════════════════════════════ */
+    .header {
       position: relative;
       z-index: 20;
-      padding: calc(var(--safe-top) + 12px) 16px 12px 16px;
+      padding: calc(var(--safe-t) + 10px) 14px 10px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: var(--bg-surface-glass);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border-bottom: 1px solid var(--border-subtle);
+      background: var(--bg-glass);
+      backdrop-filter: blur(30px) saturate(180%);
+      -webkit-backdrop-filter: blur(30px) saturate(180%);
+      border-bottom: 1px solid var(--border-dim);
     }
-
-    .btn-icon {
+    .h-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--r-sm);
       background: transparent;
       border: none;
-      color: var(--text-secondary);
+      color: var(--text-2);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 40px;
-      height: 40px;
-      border-radius: var(--radius-md);
-      transition: all 0.2s var(--ease-out);
+      transition: all 0.2s var(--spring);
       flex-shrink: 0;
     }
-    .btn-icon:hover, .btn-icon:active {
-      background: var(--bg-surface-elevated);
-      color: var(--text-primary);
-    }
+    .h-btn:active { background: var(--bg-elevated); color: var(--text-1); transform: scale(0.92); }
 
-    /* ──── Model Switcher Pill ──── */
-    .model-selector {
+    /* Model pill */
+    .model-pill {
       display: flex;
       align-items: center;
-      gap: 6px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-subtle);
-      padding: 7px 14px;
-      border-radius: var(--radius-full);
+      gap: 7px;
+      padding: 6px 14px 6px 10px;
+      border-radius: var(--r-full);
+      background: var(--bg-glass-light);
+      border: 1px solid var(--border-dim);
       cursor: pointer;
-      transition: all 0.25s var(--ease-out);
+      transition: all 0.25s var(--spring);
     }
-    .model-selector:active {
-      transform: scale(0.96);
-      background: rgba(255, 255, 255, 0.08);
-    }
-    .model-selector:hover {
-      border-color: rgba(155, 114, 203, 0.4);
-      box-shadow: 0 0 14px rgba(155, 114, 203, 0.15);
-    }
-
-    .gemini-sparkle-icon {
-      width: 18px;
-      height: 18px;
-      background: var(--gemini-gradient);
+    .model-pill:active { transform: scale(0.95); }
+    .model-pill:hover { border-color: rgba(139, 92, 246, 0.4); box-shadow: 0 0 16px rgba(139, 92, 246, 0.12); }
+    .star-icon {
+      width: 18px; height: 18px;
+      background: var(--gradient-main);
       -webkit-mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C12 6.627 6.627 12 0 12c6.627 0 12 5.627 12 12 0-6.627 5.627-12 12-12-6.627 0-12-5.627-12-12z"/></svg>') no-repeat center / contain;
       mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C12 6.627 6.627 12 0 12c6.627 0 12 5.627 12 12 0-6.627 5.627-12 12-12-6.627 0-12-5.627-12-12z"/></svg>') no-repeat center / contain;
       flex-shrink: 0;
     }
+    .model-name { font-size: 12.5px; font-weight: 700; color: #fff; white-space: nowrap; letter-spacing: -0.2px; }
 
-    .model-title {
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: -0.2px;
-      color: #fff;
-      white-space: nowrap;
-    }
-
-    /* ──── Chat Viewport ──── */
-    .chat-scroll {
+    /* ═══════════════════════════════════════
+       CHAT VIEWPORT
+    ═══════════════════════════════════════ */
+    .chat-area {
       flex: 1;
       overflow-y: auto;
-      padding: 16px;
+      overflow-x: hidden;
+      padding: 18px 16px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
-      scroll-behavior: smooth;
+      gap: 16px;
       z-index: 10;
+      scroll-behavior: smooth;
+      overscroll-behavior: contain;
     }
-    .chat-scroll::-webkit-scrollbar { width: 4px; }
-    .chat-scroll::-webkit-scrollbar-track { background: transparent; }
-    .chat-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 99px; }
+    .chat-area::-webkit-scrollbar { width: 3px; }
+    .chat-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 99px; }
 
-    /* ──── Welcome Hero ──── */
-    .welcome-box {
-      margin: auto 0 20px 0;
+    /* ═══════════════════════════════════════
+       WELCOME SCREEN
+    ═══════════════════════════════════════ */
+    .welcome {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
-      padding: 10px 4px;
-      animation: welcomeFadeIn 0.6s var(--ease-out);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      flex: 1;
+      padding: 20px 8px 10px;
+      animation: welcomeUp 0.7s var(--spring);
     }
-    @keyframes welcomeFadeIn {
-      from { opacity: 0; transform: translateY(16px); }
+    @keyframes welcomeUp {
+      from { opacity: 0; transform: translateY(24px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .gemini-big-star {
-      width: 48px;
-      height: 48px;
-      background: var(--gemini-gradient);
+    .welcome-star {
+      width: 56px; height: 56px;
+      background: var(--gradient-main);
       -webkit-mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C12 6.627 6.627 12 0 12c6.627 0 12 5.627 12 12 0-6.627 5.627-12 12-12-6.627 0-12-5.627-12-12z"/></svg>') no-repeat center / contain;
       mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C12 6.627 6.627 12 0 12c6.627 0 12 5.627 12 12 0-6.627 5.627-12 12-12-6.627 0-12-5.627-12-12z"/></svg>') no-repeat center / contain;
       margin-bottom: 20px;
-      filter: drop-shadow(0 0 18px rgba(155, 114, 203, 0.7));
-      animation: pulseStar 4s infinite ease-in-out alternate;
+      filter: drop-shadow(0 0 22px rgba(139, 92, 246, 0.65));
+      animation: starPulse 3.5s ease-in-out infinite alternate;
     }
-    @keyframes pulseStar {
-      0% { transform: scale(1) rotate(0deg); }
-      100% { transform: scale(1.12) rotate(8deg); }
+    @keyframes starPulse {
+      0% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 22px rgba(139, 92, 246, 0.65)); }
+      100% { transform: scale(1.1) rotate(10deg); filter: drop-shadow(0 0 30px rgba(236, 72, 153, 0.6)); }
     }
 
-    .welcome-headline {
-      font-size: 30px;
+    .welcome h1 {
+      font-size: 28px;
       font-weight: 800;
-      line-height: 1.2;
-      letter-spacing: -0.8px;
-      background: var(--gemini-gradient);
+      letter-spacing: -1px;
+      line-height: 1.15;
+      background: var(--gradient-main);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
       margin-bottom: 8px;
     }
-
-    .welcome-sub {
-      font-size: 14px;
-      color: var(--text-secondary);
+    .welcome p {
+      font-size: 13.5px;
+      color: var(--text-2);
       line-height: 1.55;
+      max-width: 280px;
       margin-bottom: 28px;
     }
 
-    /* ──── Prompt Grid Cards ──── */
-    .prompt-grid {
+    /* Suggestion cards */
+    .cards {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
       width: 100%;
     }
-
-    .gemini-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
+    .s-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--r-md);
       padding: 14px;
       cursor: pointer;
-      transition: all 0.25s var(--ease-out);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 92px;
+      min-height: 88px;
+      transition: all 0.25s var(--spring);
+      position: relative;
+      overflow: hidden;
     }
-    .gemini-card:hover, .gemini-card:active {
-      background: var(--bg-surface-elevated);
-      border-color: rgba(155, 114, 203, 0.45);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(155, 114, 203, 0.1);
+    .s-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--gradient-main);
+      opacity: 0;
+      transition: opacity 0.3s;
     }
-    .gemini-card p {
-      font-size: 13px;
-      font-weight: 500;
-      color: #e2e8f0;
+    .s-card:active, .s-card:hover {
+      background: var(--bg-elevated);
+      border-color: rgba(139, 92, 246, 0.3);
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 8px 24px rgba(139, 92, 246, 0.08);
+    }
+    .s-card:active::before, .s-card:hover::before { opacity: 1; }
+    .s-card .label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-1);
       line-height: 1.4;
     }
-    .gemini-card .card-icon {
+    .s-card .icon-wrap {
       align-self: flex-end;
-      color: var(--text-tertiary);
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      background: var(--gradient-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       margin-top: 8px;
     }
+    .s-card .icon-wrap i { color: var(--accent-2); }
 
-    /* ──── Messages ──── */
-    .msg-row {
-      display: flex;
-      gap: 12px;
-      max-width: 100%;
-      animation: fadeInMsg 0.3s var(--ease-out);
-    }
-    @keyframes fadeInMsg {
-      from { opacity: 0; transform: translateY(8px); }
+    /* ═══════════════════════════════════════
+       MESSAGE BUBBLES
+    ═══════════════════════════════════════ */
+    .msg { display: flex; gap: 10px; max-width: 100%; animation: msgIn 0.3s var(--spring); }
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
+    .msg.user { justify-content: flex-end; }
 
-    .msg-row.user {
-      justify-content: flex-end;
-    }
-
-    .user-bubble {
-      background: linear-gradient(135deg, #1e2740 0%, #232733 100%);
-      color: #ffffff;
-      padding: 12px 18px;
-      border-radius: 20px 20px 4px 20px;
+    .bubble-user {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-med);
+      color: #fff;
+      padding: 11px 16px;
+      border-radius: 18px 18px 4px 18px;
       font-size: 14px;
       line-height: 1.55;
-      max-width: 82%;
-      border: 1px solid rgba(255,255,255,0.07);
+      max-width: 84%;
       user-select: text;
       word-wrap: break-word;
+      position: relative;
+    }
+    .bubble-user::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      border-radius: inherit;
+      background: var(--gradient-subtle);
+      pointer-events: none;
     }
 
-    .ai-avatar {
+    .ai-icon {
       flex-shrink: 0;
-      margin-top: 4px;
+      width: 24px; height: 24px;
+      margin-top: 2px;
     }
-
-    .ai-bubble-wrap {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      min-width: 0;
-    }
-
-    .ai-bubble {
-      color: #e2e8f0;
-      font-size: 14.5px;
-      line-height: 1.65;
+    .ai-wrap { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+    .bubble-ai {
+      color: var(--text-1);
+      font-size: 14px;
+      line-height: 1.7;
       user-select: text;
       word-wrap: break-word;
       overflow-wrap: break-word;
     }
 
-    /* Markdown inside AI bubble */
-    .ai-bubble h1, .ai-bubble h2, .ai-bubble h3 {
-      font-weight: 700;
-      margin: 14px 0 6px 0;
-      color: #fff;
-    }
-    .ai-bubble h1 { font-size: 18px; }
-    .ai-bubble h2 { font-size: 16px; }
-    .ai-bubble h3 { font-size: 15px; }
-    .ai-bubble p { margin-bottom: 8px; }
-    .ai-bubble p:last-child { margin-bottom: 0; }
-    .ai-bubble ul, .ai-bubble ol {
-      margin: 8px 0;
-      padding-left: 20px;
-    }
-    .ai-bubble li { margin-bottom: 4px; }
-    .ai-bubble strong { color: #fff; font-weight: 600; }
-    .ai-bubble a {
-      color: #8ab4f8;
-      text-decoration: underline;
-      text-underline-offset: 2px;
-    }
-    .ai-bubble blockquote {
-      border-left: 3px solid rgba(155, 114, 203, 0.5);
-      padding-left: 12px;
+    /* Markdown styling */
+    .bubble-ai h1, .bubble-ai h2, .bubble-ai h3 { font-weight: 700; color: #fff; margin: 12px 0 6px; }
+    .bubble-ai h1 { font-size: 17px; } .bubble-ai h2 { font-size: 15.5px; } .bubble-ai h3 { font-size: 14.5px; }
+    .bubble-ai p { margin-bottom: 8px; } .bubble-ai p:last-child { margin-bottom: 0; }
+    .bubble-ai ul, .bubble-ai ol { margin: 8px 0; padding-left: 18px; }
+    .bubble-ai li { margin-bottom: 4px; }
+    .bubble-ai strong { color: #fff; font-weight: 600; }
+    .bubble-ai a { color: var(--accent-4); text-decoration: underline; text-underline-offset: 2px; }
+    .bubble-ai blockquote {
+      border-left: 3px solid var(--accent-2);
+      padding: 6px 12px;
       margin: 10px 0;
-      color: var(--text-secondary);
+      color: var(--text-2);
       font-style: italic;
+      background: rgba(168,85,247,0.04);
+      border-radius: 0 var(--r-xs) var(--r-xs) 0;
     }
-    .ai-bubble code:not(pre code) {
-      background: rgba(255,255,255,0.08);
-      padding: 2px 6px;
+    .bubble-ai code:not(pre code) {
+      background: rgba(255,255,255,0.07);
+      padding: 2px 7px;
       border-radius: 5px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 12.5px;
-      color: #8ab4f8;
+      font-size: 12px;
+      color: #c4b5fd;
     }
-
-    /* ──── Code Blocks ──── */
-    .ai-bubble pre {
-      margin: 12px 0;
-      background: #000000 !important;
-      border: 1px solid var(--border-subtle);
-      border-radius: 12px;
+    .bubble-ai pre {
+      margin: 10px 0;
+      background: #000 !important;
+      border: 1px solid var(--border-dim);
+      border-radius: var(--r-sm);
       overflow: hidden;
       position: relative;
     }
-    .ai-bubble pre code {
+    .bubble-ai pre code {
       display: block;
-      padding: 14px 16px;
+      padding: 14px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 12.5px;
-      line-height: 1.55;
-      color: #f1f5f9;
+      font-size: 12px;
+      line-height: 1.6;
+      color: #e2e8f0;
       overflow-x: auto;
       background: transparent !important;
     }
 
-    .code-copy-btn {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px;
-      color: var(--text-secondary);
-      padding: 5px 8px;
-      font-size: 11px;
+    .code-copy {
+      position: absolute; top: 6px; right: 6px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-dim);
+      border-radius: 6px;
+      color: var(--text-3);
+      padding: 4px 8px;
+      font-size: 10px;
       font-family: 'JetBrains Mono', monospace;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.2s;
+      display: flex; align-items: center; gap: 4px;
+      transition: all 0.15s;
       z-index: 5;
     }
-    .code-copy-btn:hover {
-      background: rgba(255,255,255,0.12);
-      color: #fff;
-    }
+    .code-copy:hover { background: rgba(255,255,255,0.1); color: #fff; }
 
-    /* ──── Message Actions ──── */
-    .msg-actions {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding-top: 4px;
+    /* Actions */
+    .actions { display: flex; gap: 14px; padding-top: 2px; }
+    .act-btn {
+      background: none; border: none; color: var(--text-4); cursor: pointer;
+      display: flex; align-items: center; gap: 4px;
+      font-size: 11px; font-family: inherit; transition: color 0.15s;
+      padding: 4px 0;
     }
-    .action-btn-pill {
-      background: transparent;
-      border: none;
-      color: var(--text-tertiary);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 12px;
-      font-family: inherit;
-      transition: color 0.15s;
-    }
-    .action-btn-pill:hover, .action-btn-pill:active { color: var(--text-primary); }
+    .act-btn:active, .act-btn:hover { color: var(--text-1); }
 
-    /* ──── Typing Loader ──── */
-    .gemini-loader {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 0;
+    /* Loader */
+    .ai-loader { display: inline-flex; gap: 5px; padding: 6px 0; }
+    .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--gradient-main);
+      animation: dotBounce 1.4s ease-in-out infinite both;
     }
-    .loader-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--gemini-gradient);
-      animation: jumpDot 1.4s infinite ease-in-out both;
-    }
-    .loader-dot:nth-child(2) { animation-delay: 0.16s; }
-    .loader-dot:nth-child(3) { animation-delay: 0.32s; }
-    @keyframes jumpDot {
-      0%, 80%, 100% { transform: scale(0.4); opacity: 0.3; }
+    .dot:nth-child(2) { animation-delay: 0.16s; }
+    .dot:nth-child(3) { animation-delay: 0.32s; }
+    @keyframes dotBounce {
+      0%, 80%, 100% { transform: scale(0.35); opacity: 0.25; }
       40% { transform: scale(1); opacity: 1; }
     }
 
-    /* ──── Typing cursor on streaming ──── */
     .is-typing::after {
       content: '▊';
-      animation: blinkCaret 1s steps(2, start) infinite;
-      color: #9b72cb;
-      margin-left: 2px;
+      animation: caretBlink 1s steps(2,start) infinite;
+      color: var(--accent-2);
+      margin-left: 1px;
     }
-    @keyframes blinkCaret {
-      to { visibility: hidden; }
-    }
+    @keyframes caretBlink { to { visibility: hidden; } }
 
-    /* ──── Bottom Composer ──── */
-    .composer-wrap {
-      padding: 10px 14px calc(var(--safe-bottom) + 12px) 14px;
-      background: linear-gradient(to top, var(--bg-main) 75%, rgba(7, 8, 11, 0) 100%);
+    /* ═══════════════════════════════════════
+       COMPOSER
+    ═══════════════════════════════════════ */
+    .composer {
+      padding: 8px 12px calc(var(--safe-b) + 10px);
+      background: linear-gradient(to top, var(--bg-primary) 80%, transparent 100%);
       z-index: 20;
     }
-
-    .composer-pill {
-      position: relative;
-      background: var(--bg-surface-elevated);
-      border: 1px solid var(--border-bright);
-      border-radius: 28px;
-      padding: 6px 8px 6px 14px;
+    .compose-bar {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-med);
+      border-radius: var(--r-xl);
+      padding: 5px 6px 5px 6px;
       display: flex;
       align-items: flex-end;
-      gap: 8px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
-      transition: border 0.25s, box-shadow 0.25s;
+      gap: 4px;
+      box-shadow: 0 6px 28px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.02);
+      transition: border-color 0.25s, box-shadow 0.25s;
     }
-    .composer-pill:focus-within {
-      border-color: rgba(155, 114, 203, 0.6);
-      box-shadow: 0 0 24px var(--gemini-glow), 0 8px 30px rgba(0,0,0,0.5);
+    .compose-bar:focus-within {
+      border-color: rgba(139, 92, 246, 0.5);
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.15), 0 6px 28px rgba(0,0,0,0.45);
     }
 
-    .composer-textarea {
+    .c-btn {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: transparent; border: none;
+      color: var(--text-3); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s; flex-shrink: 0;
+    }
+    .c-btn:active { color: var(--text-1); transform: scale(0.9); }
+
+    .c-input {
       flex: 1;
       background: transparent;
-      border: none;
-      outline: none;
-      color: var(--text-primary);
+      border: none; outline: none;
+      color: var(--text-1);
       font-family: inherit;
-      font-size: 14.5px;
+      font-size: 14px;
       line-height: 22px;
-      max-height: 120px;
-      min-height: 24px;
+      max-height: 110px;
+      min-height: 22px;
       resize: none;
-      padding: 6px 0;
+      padding: 6px 4px;
       user-select: text;
     }
-    .composer-textarea::placeholder {
-      color: var(--text-tertiary);
-    }
+    .c-input::placeholder { color: var(--text-4); }
 
-    .composer-btns {
-      display: flex;
-      align-items: center;
-      gap: 6px;
+    .send-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--gradient-main);
+      border: none; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0;
+      transition: all 0.2s var(--spring);
+      box-shadow: 0 2px 10px rgba(139, 92, 246, 0.35);
     }
-
-    .send-pill-btn {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: var(--gemini-gradient);
-      border: none;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s var(--ease-out);
-      flex-shrink: 0;
-    }
-    .send-pill-btn:disabled {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--text-tertiary);
+    .send-btn:disabled {
+      background: var(--bg-glass-light);
+      color: var(--text-4);
       cursor: not-allowed;
+      box-shadow: none;
     }
-    .send-pill-btn:not(:disabled):active {
-      transform: scale(0.9);
-    }
-    .send-pill-btn:not(:disabled):hover {
-      box-shadow: 0 0 16px rgba(155, 114, 203, 0.4);
-    }
+    .send-btn:not(:disabled):active { transform: scale(0.88); }
 
-    /* ──── Side Drawer ──── */
-    .drawer-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      z-index: 50;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s var(--ease-out);
+    /* ═══════════════════════════════════════
+       DRAWER
+    ═══════════════════════════════════════ */
+    .drawer-bg {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      z-index: 50; opacity: 0; pointer-events: none;
+      transition: opacity 0.3s var(--spring);
     }
-    .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+    .drawer-bg.on { opacity: 1; pointer-events: auto; }
 
-    .drawer-panel {
-      position: absolute;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      width: 84%;
-      max-width: 320px;
-      background: var(--bg-surface);
-      z-index: 60;
+    .drawer {
+      position: absolute; top: 0; left: 0; bottom: 0;
+      width: 82%; max-width: 310px;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border-dim);
+      z-index: 55;
       transform: translateX(-100%);
-      transition: transform 0.35s var(--ease-out);
-      border-right: 1px solid var(--border-subtle);
-      padding: calc(var(--safe-top) + 16px) 14px calc(var(--safe-bottom) + 16px) 14px;
-      display: flex;
-      flex-direction: column;
+      transition: transform 0.35s var(--spring);
+      display: flex; flex-direction: column;
+      padding: calc(var(--safe-t) + 14px) 12px calc(var(--safe-b) + 14px);
     }
-    .drawer-panel.open { transform: translateX(0); }
+    .drawer.on { transform: translateX(0); }
 
-    .drawer-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
+    .drawer-top {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 4px 4px 16px;
+      border-bottom: 1px solid var(--border-dim);
+      margin-bottom: 14px;
     }
-    .drawer-brand {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .drawer-brand span {
-      font-weight: 700;
-      font-size: 16px;
-    }
+    .drawer-logo { display: flex; align-items: center; gap: 8px; }
+    .drawer-logo .star-icon { width: 22px; height: 22px; }
+    .drawer-logo span { font-weight: 800; font-size: 17px; background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 
-    .drawer-new-btn {
-      width: 100%;
-      padding: 12px;
-      border-radius: var(--radius-md);
-      background: var(--bg-surface-elevated);
-      border: 1px solid var(--border-subtle);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      margin-bottom: 20px;
-      font-family: inherit;
+    .new-chat-btn {
+      width: 100%; padding: 11px 14px;
+      border-radius: var(--r-sm);
+      background: var(--gradient-subtle);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      color: #c4b5fd;
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 600; font-size: 13.5px; font-family: inherit;
+      cursor: pointer; margin-bottom: 16px;
       transition: all 0.2s;
     }
-    .drawer-new-btn:hover {
-      background: rgba(255,255,255,0.08);
-      border-color: rgba(155, 114, 203, 0.3);
-    }
-    .drawer-new-btn:active { transform: scale(0.98); }
+    .new-chat-btn:active { transform: scale(0.97); background: rgba(139,92,246,0.15); }
 
-    .drawer-section-label {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-tertiary);
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      margin-bottom: 8px;
-    }
+    .d-label { font-size: 10px; font-weight: 700; color: var(--text-4); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; padding: 0 4px; }
 
-    .drawer-threads {
-      flex: 1;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .drawer-threads::-webkit-scrollbar { width: 3px; }
-    .drawer-threads::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 99px; }
+    .thread-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+    .thread-list::-webkit-scrollbar { width: 2px; }
+    .thread-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.04); }
 
-    .thread-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 10px;
-      font-size: 13px;
-      color: var(--text-secondary);
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.2s;
+    .t-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 10px; font-size: 13px; color: var(--text-2);
+      border-radius: var(--r-xs); cursor: pointer;
       border: 1px solid transparent;
-      gap: 8px;
-    }
-    .thread-item:hover {
-      background: rgba(255,255,255,0.03);
-      color: var(--text-primary);
-    }
-    .thread-item.active {
-      background: rgba(155, 114, 203, 0.1);
-      border-color: rgba(155, 114, 203, 0.3);
-      color: #fff;
-    }
-    .thread-item-title {
-      flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .thread-item-delete {
-      background: none;
-      border: none;
-      color: var(--text-tertiary);
-      cursor: pointer;
-      padding: 4px;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
       transition: all 0.15s;
     }
-    .thread-item:hover .thread-item-delete { opacity: 1; }
-    .thread-item-delete:hover { color: #ef4444; background: rgba(239,68,68,0.1); }
+    .t-item:hover { background: rgba(255,255,255,0.03); color: var(--text-1); }
+    .t-item.on { background: rgba(139,92,246,0.1); border-color: rgba(139,92,246,0.25); color: #fff; }
+    .t-item .t-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .t-item .t-del {
+      background: none; border: none; color: var(--text-4);
+      cursor: pointer; padding: 3px; border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: all 0.12s;
+    }
+    .t-item:hover .t-del { opacity: 1; }
+    .t-item .t-del:hover { color: #f87171; background: rgba(248,113,113,0.1); }
 
-    .drawer-footer {
-      border-top: 1px solid var(--border-subtle);
-      padding-top: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+    .drawer-foot {
+      border-top: 1px solid var(--border-dim);
+      padding-top: 10px;
+      display: flex; flex-direction: column; gap: 2px;
     }
-    .drawer-footer-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px;
-      font-size: 13px;
-      color: var(--text-secondary);
-      cursor: pointer;
-      border-radius: 10px;
-      border: none;
-      background: none;
-      font-family: inherit;
-      width: 100%;
-      transition: all 0.15s;
+    .d-link {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 10px; font-size: 13px; color: var(--text-3);
+      cursor: pointer; border-radius: var(--r-xs);
+      border: none; background: none; font-family: inherit; width: 100%;
+      transition: all 0.12s;
     }
-    .drawer-footer-item:hover {
-      background: rgba(255,255,255,0.04);
-      color: var(--text-primary);
-    }
+    .d-link:hover { background: rgba(255,255,255,0.03); color: var(--text-1); }
 
-    /* ──── Settings Modal ──── */
-    .settings-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.75);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+    /* ═══════════════════════════════════════
+       SETTINGS MODAL
+    ═══════════════════════════════════════ */
+    .s-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
       z-index: 80;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.25s var(--ease-out);
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s var(--spring);
     }
-    .settings-overlay.open { opacity: 1; pointer-events: auto; }
+    .s-overlay.on { opacity: 1; pointer-events: auto; }
 
-    .settings-panel {
-      width: 100%;
-      max-width: 360px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-bright);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      transform: scale(0.92) translateY(12px);
-      transition: transform 0.3s var(--ease-out);
-      box-shadow: 0 24px 60px rgba(0,0,0,0.6);
-    }
-    .settings-overlay.open .settings-panel {
-      transform: scale(1) translateY(0);
-    }
-
-    .settings-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .settings-header h3 {
-      font-size: 16px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .settings-field { display: flex; flex-direction: column; gap: 6px; }
-    .settings-label {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-tertiary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .settings-input {
-      width: 100%;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border-subtle);
-      border-radius: 12px;
-      padding: 10px 14px;
-      outline: none;
-      color: var(--text-primary);
-      font-family: inherit;
-      font-size: 13px;
-      transition: border 0.2s;
-    }
-    .settings-input:focus { border-color: rgba(155, 114, 203, 0.5); }
-    .settings-select {
-      width: 100%;
-      background: var(--bg-surface-elevated);
-      border: 1px solid var(--border-subtle);
-      border-radius: 12px;
-      padding: 10px 14px;
-      outline: none;
-      color: var(--text-primary);
-      font-family: inherit;
-      font-size: 13px;
-      cursor: pointer;
-      -webkit-appearance: none;
-      transition: border 0.2s;
-    }
-    .settings-select:focus { border-color: rgba(155, 114, 203, 0.5); }
-    .settings-textarea {
-      width: 100%;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border-subtle);
-      border-radius: 12px;
-      padding: 10px 14px;
-      outline: none;
-      color: var(--text-primary);
-      font-family: inherit;
-      font-size: 13px;
-      resize: none;
-      min-height: 60px;
-      line-height: 1.5;
-      transition: border 0.2s;
-    }
-    .settings-textarea:focus { border-color: rgba(155, 114, 203, 0.5); }
-
-    .settings-range-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .settings-range-val {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      color: #9b72cb;
-      font-weight: 600;
-    }
-    input[type="range"] {
-      width: 100%;
-      accent-color: #9b72cb;
-      margin-top: 4px;
-    }
-
-    .settings-actions {
-      display: flex;
-      gap: 10px;
-      padding-top: 6px;
-    }
-    .btn-settings-cancel {
-      flex: 1;
-      padding: 10px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-secondary);
-      font-weight: 600;
-      font-size: 13px;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.15s;
-    }
-    .btn-settings-cancel:hover { background: rgba(255,255,255,0.08); color: #fff; }
-    .btn-settings-save {
-      flex: 1;
-      padding: 10px;
-      border-radius: 12px;
-      background: var(--gemini-gradient);
-      border: none;
-      color: #fff;
-      font-weight: 700;
-      font-size: 13px;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.2s;
-      box-shadow: 0 4px 16px rgba(155, 114, 203, 0.3);
-    }
-    .btn-settings-save:hover { opacity: 0.9; }
-    .btn-settings-save:active { transform: scale(0.97); }
-
-    /* ──── API Key Overlay ──── */
-    .key-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      backdrop-filter: blur(16px);
-      z-index: 35;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 30px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s;
-    }
-    .key-overlay.active { opacity: 1; pointer-events: auto; }
-
-    .key-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-bright);
-      border-radius: var(--radius-lg);
-      padding: 28px 24px;
-      max-width: 340px;
-      width: 100%;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
+    .s-panel {
+      width: 100%; max-width: 340px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-med);
+      border-radius: var(--r-lg);
+      padding: 22px;
+      display: flex; flex-direction: column; gap: 16px;
+      transform: scale(0.9) translateY(14px);
+      transition: transform 0.3s var(--spring);
       box-shadow: 0 20px 60px rgba(0,0,0,0.5);
     }
-    .key-card-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 16px;
-      background: rgba(251, 191, 36, 0.1);
-      border: 1px solid rgba(251, 191, 36, 0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto;
-      color: #fbbf24;
+    .s-overlay.on .s-panel { transform: scale(1) translateY(0); }
+
+    .s-head { display: flex; align-items: center; justify-content: space-between; }
+    .s-head h3 { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 7px; }
+
+    .s-field { display: flex; flex-direction: column; gap: 5px; }
+    .s-lbl { font-size: 10px; font-weight: 700; color: var(--text-4); text-transform: uppercase; letter-spacing: 0.5px; }
+    .s-inp {
+      width: 100%; background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-dim); border-radius: var(--r-xs);
+      padding: 9px 12px; outline: none;
+      color: var(--text-1); font-family: inherit; font-size: 13px;
+      transition: border 0.15s;
     }
-    .key-card h3 {
-      font-size: 18px;
-      font-weight: 700;
+    .s-inp:focus { border-color: rgba(139,92,246,0.45); }
+    .s-sel {
+      width: 100%; background: var(--bg-elevated);
+      border: 1px solid var(--border-dim); border-radius: var(--r-xs);
+      padding: 9px 12px; outline: none;
+      color: var(--text-1); font-family: inherit; font-size: 13px;
+      -webkit-appearance: none; cursor: pointer;
     }
-    .key-card p {
-      font-size: 13px;
-      color: var(--text-secondary);
-      line-height: 1.5;
+    .s-sel:focus { border-color: rgba(139,92,246,0.45); }
+    .s-ta {
+      width: 100%; background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-dim); border-radius: var(--r-xs);
+      padding: 9px 12px; outline: none;
+      color: var(--text-1); font-family: inherit; font-size: 13px;
+      resize: none; min-height: 56px; line-height: 1.45;
     }
-    .key-card-input {
-      width: 100%;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border-subtle);
-      border-radius: 12px;
-      padding: 12px 16px;
-      outline: none;
-      color: var(--text-primary);
-      font-family: inherit;
-      font-size: 14px;
+    .s-ta:focus { border-color: rgba(139,92,246,0.45); }
+    .range-row { display: flex; justify-content: space-between; align-items: center; }
+    .range-val { font-family: 'JetBrains Mono',monospace; font-size: 12px; color: var(--accent-2); font-weight: 600; }
+    input[type="range"] { width: 100%; accent-color: var(--accent-2); margin-top: 3px; }
+
+    .s-btns { display: flex; gap: 8px; padding-top: 4px; }
+    .btn-cancel {
+      flex: 1; padding: 9px; border-radius: var(--r-xs);
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border-dim);
+      color: var(--text-2); font-weight: 600; font-size: 12.5px;
+      cursor: pointer; font-family: inherit; transition: all 0.12s;
+    }
+    .btn-cancel:hover { background: rgba(255,255,255,0.07); color: #fff; }
+    .btn-save {
+      flex: 1; padding: 9px; border-radius: var(--r-xs);
+      background: var(--gradient-main); border: none;
+      color: #fff; font-weight: 700; font-size: 12.5px;
+      cursor: pointer; font-family: inherit; transition: all 0.15s;
+      box-shadow: 0 3px 12px rgba(139,92,246,0.3);
+    }
+    .btn-save:active { transform: scale(0.96); }
+
+    /* ═══════════════════════════════════════
+       API KEY OVERLAY
+    ═══════════════════════════════════════ */
+    .key-wall {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.9);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      z-index: 35;
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .key-wall.on { opacity: 1; pointer-events: auto; }
+
+    .key-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-med);
+      border-radius: var(--r-lg);
+      padding: 28px 22px;
+      max-width: 320px; width: 100%;
       text-align: center;
-      transition: border 0.2s;
+      display: flex; flex-direction: column; gap: 14px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
     }
-    .key-card-input:focus { border-color: rgba(155, 114, 203, 0.5); }
-    .key-card-btn {
-      width: 100%;
-      padding: 13px;
-      border-radius: 14px;
-      background: var(--gemini-gradient);
-      border: none;
-      color: #fff;
-      font-weight: 700;
-      font-size: 14px;
-      cursor: pointer;
-      font-family: inherit;
-      box-shadow: 0 4px 20px rgba(155, 114, 203, 0.3);
-      transition: all 0.2s;
+    .key-icon-wrap {
+      width: 50px; height: 50px;
+      border-radius: var(--r-sm);
+      background: rgba(251,191,36,0.08);
+      border: 1px solid rgba(251,191,36,0.2);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto; color: #fbbf24;
     }
-    .key-card-btn:hover { opacity: 0.92; }
-    .key-card-btn:active { transform: scale(0.97); }
+    .key-box h3 { font-size: 17px; font-weight: 700; }
+    .key-box p { font-size: 13px; color: var(--text-2); line-height: 1.45; }
+    .key-inp {
+      width: 100%; background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-dim); border-radius: var(--r-sm);
+      padding: 11px 14px; outline: none;
+      color: var(--text-1); font-family: inherit; font-size: 14px;
+      text-align: center;
+    }
+    .key-inp:focus { border-color: rgba(139,92,246,0.4); }
+    .key-btn {
+      width: 100%; padding: 12px;
+      border-radius: var(--r-sm);
+      background: var(--gradient-main); border: none;
+      color: #fff; font-weight: 700; font-size: 14px;
+      cursor: pointer; font-family: inherit;
+      box-shadow: 0 4px 16px rgba(139,92,246,0.3);
+      transition: all 0.15s;
+    }
+    .key-btn:active { transform: scale(0.97); }
 
-    /* ──── Connection Status Badge ──── */
-    .status-badge {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 10px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-      padding: 4px 10px;
-      border-radius: var(--radius-full);
-      position: absolute;
-      top: calc(var(--safe-top) + 60px);
-      right: 16px;
-      z-index: 15;
-      transition: all 0.3s;
-    }
-    .status-badge.connected {
-      background: rgba(16, 185, 129, 0.12);
-      color: #34d399;
-      border: 1px solid rgba(16, 185, 129, 0.25);
-    }
-    .status-badge.disconnected {
-      background: rgba(239, 68, 68, 0.12);
-      color: #f87171;
-      border: 1px solid rgba(239, 68, 68, 0.25);
-    }
-    .status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-    }
-    .status-badge.connected .status-dot { background: #34d399; }
-    .status-badge.disconnected .status-dot { background: #f87171; }
-
-    /* ──── Voice Overlay ──── */
-    #voice-overlay {
-      position: absolute;
-      inset: 0;
-      background: #000;
+    /* ═══════════════════════════════════════
+       VOICE OVERLAY
+    ═══════════════════════════════════════ */
+    #voice {
+      position: absolute; inset: 0;
+      background: var(--bg-primary);
       z-index: 70;
-      display: flex;
-      flex-direction: column;
+      display: flex; flex-direction: column;
       justify-content: space-between;
-      padding: calc(var(--safe-top) + 20px) 20px calc(var(--safe-bottom) + 30px) 20px;
-      opacity: 0;
-      pointer-events: none;
+      padding: calc(var(--safe-t) + 16px) 20px calc(var(--safe-b) + 24px);
+      opacity: 0; pointer-events: none;
       transition: opacity 0.35s ease;
     }
-    #voice-overlay.active { opacity: 1; pointer-events: auto; }
+    #voice.on { opacity: 1; pointer-events: auto; }
 
-    .voice-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .voice-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
+    .v-top { display: flex; justify-content: space-between; align-items: center; }
+    .v-label { font-size: 13px; font-weight: 600; color: var(--text-3); }
 
-    .voice-orb {
-      width: 140px;
-      height: 140px;
+    .v-orb {
+      width: 130px; height: 130px;
       border-radius: 50%;
-      background: var(--gemini-gradient);
-      box-shadow: 0 0 70px var(--gemini-glow), 0 0 140px var(--gemini-glow);
-      animation: orbSpin 6s infinite linear;
+      background: var(--gradient-main);
+      box-shadow: 0 0 60px var(--glow-color), 0 0 120px rgba(236,72,153,0.15);
+      animation: orbSpin 5s infinite linear;
       margin: auto;
     }
     @keyframes orbSpin {
       0% { transform: scale(1) rotate(0deg); filter: hue-rotate(0deg); }
-      50% { transform: scale(1.18) rotate(180deg); filter: hue-rotate(60deg); }
+      50% { transform: scale(1.15) rotate(180deg); filter: hue-rotate(50deg); }
       100% { transform: scale(1) rotate(360deg); filter: hue-rotate(0deg); }
     }
 
-    .voice-controls {
-      display: flex;
-      justify-content: center;
-      gap: 30px;
-      align-items: center;
+    .v-bottom { display: flex; justify-content: center; gap: 28px; }
+    .v-btn {
+      width: 52px; height: 52px; border-radius: 50%;
+      border: none; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.15s;
     }
-    .voice-btn {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .voice-btn:active { transform: scale(0.92); }
-    .voice-btn-mute {
-      background: var(--bg-surface-elevated);
-      border: 1px solid var(--border-subtle) !important;
-      color: var(--text-secondary);
-    }
-    .voice-btn-end {
-      background: #ef4444;
-      color: #fff;
-    }
+    .v-btn:active { transform: scale(0.9); }
+    .v-mute { background: var(--bg-elevated); border: 1px solid var(--border-dim) !important; color: var(--text-2); }
+    .v-end { background: #ef4444; color: #fff; }
 
-    /* ──── Error Toast ──── */
-    .error-toast {
-      position: absolute;
-      bottom: 100px;
-      left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.3);
+    /* ═══════════════════════════════════════
+       ERROR TOAST
+    ═══════════════════════════════════════ */
+    .toast {
+      position: absolute; bottom: 90px; left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: rgba(239,68,68,0.12);
+      border: 1px solid rgba(239,68,68,0.25);
       color: #f87171;
-      padding: 10px 18px;
-      border-radius: var(--radius-md);
-      font-size: 13px;
-      z-index: 40;
+      padding: 9px 16px; border-radius: var(--r-sm);
+      font-size: 12.5px; z-index: 40;
       backdrop-filter: blur(8px);
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.3s var(--ease-out);
-      max-width: 90%;
-      text-align: center;
+      opacity: 0; pointer-events: none;
+      transition: all 0.3s var(--spring);
+      max-width: 88%; text-align: center;
     }
-    .error-toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-      pointer-events: auto;
-    }
+    .toast.on { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
   </style>
 </head>
 <body>
 
-  <div id="app-container">
-    <div class="ambient-glow"></div>
+<div id="phone">
+  <div class="glow-top"></div>
+  <div class="glow-bottom"></div>
 
-    <!-- Connection Status Badge -->
-    <div class="status-badge disconnected" id="status-badge">
-      <div class="status-dot"></div>
-      <span id="status-text">Disconnected</span>
+  <!-- HEADER -->
+  <header class="header">
+    <button class="h-btn" id="menuBtn" aria-label="Menu"><i data-lucide="menu" size="19"></i></button>
+    <div class="model-pill" id="modelPill">
+      <div class="star-icon"></div>
+      <span class="model-name" id="modelName">Gemini 2.5 Flash</span>
+      <i data-lucide="chevron-down" size="13" style="color:var(--text-3)"></i>
     </div>
+    <button class="h-btn" id="newChatBtn" aria-label="New Chat"><i data-lucide="square-pen" size="19"></i></button>
+  </header>
 
-    <!-- ── Header ── -->
-    <header class="app-header">
-      <button class="btn-icon" id="open-menu" aria-label="Menu">
-        <i data-lucide="menu" size="20"></i>
-      </button>
-
-      <div class="model-selector" id="toggle-model">
-        <div class="gemini-sparkle-icon"></div>
-        <span class="model-title" id="active-model-name">Gemini 2.5 Flash</span>
-        <i data-lucide="chevron-down" size="14" color="var(--text-secondary)"></i>
-      </div>
-
-      <button class="btn-icon" id="new-chat-top" aria-label="New Chat">
-        <i data-lucide="square-pen" size="20"></i>
-      </button>
-    </header>
-
-    <!-- ── Chat Area ── -->
-    <main class="chat-scroll" id="chat-viewport">
-      <!-- Welcome View -->
-      <div class="welcome-box" id="welcome-view">
-        <div class="gemini-big-star"></div>
-        <h1 class="welcome-headline">Hello, Jeet</h1>
-        <p class="welcome-sub">How can I assist you with your projects, code, or ideas today?</p>
-
-        <div class="prompt-grid">
-          <div class="gemini-card" onclick="sendQuick('Code a responsive navbar in HTML/CSS')">
-            <p>Code a responsive navigation bar</p>
-            <div class="card-icon"><i data-lucide="code-2" size="18"></i></div>
-          </div>
-          <div class="gemini-card" onclick="sendQuick('Explain asynchronous JavaScript & Event Loop')">
-            <p>Explain JS Event Loop simply</p>
-            <div class="card-icon"><i data-lucide="zap" size="18"></i></div>
-          </div>
-          <div class="gemini-card" onclick="sendQuick('Write a high-converting landing page copy')">
-            <p>Write killer landing page copy</p>
-            <div class="card-icon"><i data-lucide="feather" size="18"></i></div>
-          </div>
-          <div class="gemini-card" onclick="sendQuick('Brainstorm 3 game development mechanics')">
-            <p>Brainstorm new game mechanics</p>
-            <div class="card-icon"><i data-lucide="gamepad-2" size="18"></i></div>
-          </div>
+  <!-- CHAT -->
+  <main class="chat-area" id="chatArea">
+    <div class="welcome" id="welcomeView">
+      <div class="welcome-star"></div>
+      <h1>Hello, Jeet</h1>
+      <p>How can I help you with your projects, code, or ideas today?</p>
+      <div class="cards">
+        <div class="s-card" onclick="sendQuick('Code a responsive navbar in HTML/CSS')">
+          <span class="label">Code a responsive navbar</span>
+          <div class="icon-wrap"><i data-lucide="code-2" size="14"></i></div>
         </div>
-      </div>
-    </main>
-
-    <!-- ── Bottom Composer ── -->
-    <footer class="composer-wrap">
-      <div class="composer-pill">
-        <button class="btn-icon" style="width: 32px; height: 32px; color: var(--text-secondary);" title="Attach Media">
-          <i data-lucide="image" size="19"></i>
-        </button>
-        <textarea
-          id="chat-input"
-          class="composer-textarea"
-          placeholder="Ask Gemini..."
-          rows="1"
-        ></textarea>
-        <div class="composer-btns">
-          <button class="btn-icon" id="open-voice" style="width: 34px; height: 34px;" title="Voice Assistant">
-            <i data-lucide="mic" size="20"></i>
-          </button>
-          <button class="send-pill-btn" id="send-btn" disabled title="Send">
-            <i data-lucide="arrow-up" size="20"></i>
-          </button>
+        <div class="s-card" onclick="sendQuick('Explain asynchronous JavaScript & Event Loop')">
+          <span class="label">Explain JS Event Loop</span>
+          <div class="icon-wrap"><i data-lucide="zap" size="14"></i></div>
         </div>
-      </div>
-    </footer>
-
-    <!-- ── Side Navigation Drawer ── -->
-    <div class="drawer-overlay" id="drawer-overlay"></div>
-    <aside class="drawer-panel" id="drawer-panel">
-      <div class="drawer-header">
-        <div class="drawer-brand">
-          <div class="gemini-sparkle-icon" style="width: 22px; height: 22px;"></div>
-          <span>Gemini</span>
+        <div class="s-card" onclick="sendQuick('Write a high-converting landing page copy')">
+          <span class="label">Write landing page copy</span>
+          <div class="icon-wrap"><i data-lucide="feather" size="14"></i></div>
         </div>
-        <button class="btn-icon" id="close-drawer"><i data-lucide="x" size="18"></i></button>
-      </div>
-
-      <button class="drawer-new-btn" onclick="createNewChat()">
-        <i data-lucide="plus" size="18"></i> New Conversation
-      </button>
-
-      <span class="drawer-section-label">Recent</span>
-      <div class="drawer-threads" id="drawer-threads-list">
-        <!-- Threads dynamically injected -->
-      </div>
-
-      <div class="drawer-footer">
-        <button class="drawer-footer-item" onclick="clearAllChats()">
-          <i data-lucide="trash-2" size="16"></i> Clear All Chats
-        </button>
-        <button class="drawer-footer-item" onclick="openSettings()">
-          <i data-lucide="settings" size="16"></i> Settings
-        </button>
-      </div>
-    </aside>
-
-    <!-- ── Settings Modal ── -->
-    <div class="settings-overlay" id="settings-overlay">
-      <div class="settings-panel">
-        <div class="settings-header">
-          <h3><i data-lucide="sliders" size="16" style="color: #9b72cb;"></i> Settings</h3>
-          <button class="btn-icon" id="close-settings" style="width: 32px; height: 32px;">
-            <i data-lucide="x" size="16"></i>
-          </button>
-        </div>
-
-        <div class="settings-field">
-          <label class="settings-label">Gemini API Key</label>
-          <input type="password" id="settings-api-key" class="settings-input" placeholder="Enter your API key..." />
-        </div>
-
-        <div class="settings-field">
-          <label class="settings-label">Model</label>
-          <select id="settings-model" class="settings-select">
-            <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommended)</option>
-            <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
-            <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-          </select>
-        </div>
-
-        <div class="settings-field">
-          <label class="settings-label">System Instruction</label>
-          <textarea id="settings-system-prompt" class="settings-textarea" rows="3" placeholder="Custom system instructions..."></textarea>
-        </div>
-
-        <div class="settings-field">
-          <div class="settings-range-row">
-            <label class="settings-label">Temperature</label>
-            <span class="settings-range-val" id="temp-label">0.7</span>
-          </div>
-          <input type="range" id="settings-temp" min="0" max="2" step="0.1" value="0.7" />
-        </div>
-
-        <div class="settings-actions">
-          <button class="btn-settings-cancel" onclick="closeSettings()">Cancel</button>
-          <button class="btn-settings-save" onclick="saveSettings()">Save</button>
+        <div class="s-card" onclick="sendQuick('Brainstorm 3 game development mechanics')">
+          <span class="label">Brainstorm game ideas</span>
+          <div class="icon-wrap"><i data-lucide="gamepad-2" size="14"></i></div>
         </div>
       </div>
     </div>
+  </main>
 
-    <!-- ── API Key Overlay ── -->
-    <div class="key-overlay" id="key-overlay">
-      <div class="key-card">
-        <div class="key-card-icon">
-          <i data-lucide="key" size="24"></i>
+  <!-- COMPOSER -->
+  <footer class="composer">
+    <div class="compose-bar">
+      <button class="c-btn" title="Attach"><i data-lucide="image" size="18"></i></button>
+      <textarea id="chatInput" class="c-input" placeholder="Message ZoZo AI..." rows="1"></textarea>
+      <button class="c-btn" id="voiceBtn" title="Voice"><i data-lucide="mic" size="18"></i></button>
+      <button class="send-btn" id="sendBtn" disabled title="Send"><i data-lucide="arrow-up" size="18"></i></button>
+    </div>
+  </footer>
+
+  <!-- DRAWER -->
+  <div class="drawer-bg" id="drawerBg"></div>
+  <aside class="drawer" id="drawer">
+    <div class="drawer-top">
+      <div class="drawer-logo">
+        <div class="star-icon"></div>
+        <span>ZoZo AI</span>
+      </div>
+      <button class="h-btn" id="closeDrawer"><i data-lucide="x" size="17"></i></button>
+    </div>
+    <button class="new-chat-btn" onclick="createNewChat()"><i data-lucide="plus" size="16"></i> New Conversation</button>
+    <span class="d-label">Recent</span>
+    <div class="thread-list" id="threadList"></div>
+    <div class="drawer-foot">
+      <button class="d-link" onclick="clearAllChats()"><i data-lucide="trash-2" size="15"></i> Clear All Chats</button>
+      <button class="d-link" onclick="openSettings()"><i data-lucide="settings" size="15"></i> Settings</button>
+    </div>
+  </aside>
+
+  <!-- SETTINGS -->
+  <div class="s-overlay" id="settingsOv">
+    <div class="s-panel">
+      <div class="s-head">
+        <h3><i data-lucide="sliders" size="15" style="color:var(--accent-2)"></i> Settings</h3>
+        <button class="h-btn" id="closeSettings" style="width:30px;height:30px"><i data-lucide="x" size="15"></i></button>
+      </div>
+      <div class="s-field">
+        <label class="s-lbl">API Key</label>
+        <input type="password" id="sKey" class="s-inp" placeholder="Enter Gemini API key...">
+      </div>
+      <div class="s-field">
+        <label class="s-lbl">Model</label>
+        <select id="sModel" class="s-sel">
+          <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+          <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+          <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+          <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+          <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+        </select>
+      </div>
+      <div class="s-field">
+        <label class="s-lbl">System Prompt</label>
+        <textarea id="sSys" class="s-ta" rows="2" placeholder="Custom instructions..."></textarea>
+      </div>
+      <div class="s-field">
+        <div class="range-row">
+          <label class="s-lbl">Temperature</label>
+          <span class="range-val" id="tempVal">0.7</span>
         </div>
-        <h3>API Key Required</h3>
-        <p>Enter your Gemini API key to start chatting with the AI.</p>
-        <input type="password" id="overlay-api-key" class="key-card-input" placeholder="Paste your API key..." />
-        <button class="key-card-btn" onclick="saveOverlayKey()">Connect Gemini AI</button>
+        <input type="range" id="sTemp" min="0" max="2" step="0.1" value="0.7">
+      </div>
+      <div class="s-btns">
+        <button class="btn-cancel" onclick="closeSettingsModal()">Cancel</button>
+        <button class="btn-save" onclick="saveSettings()">Save</button>
       </div>
     </div>
-
-    <!-- ── Voice Overlay ── -->
-    <div id="voice-overlay">
-      <div class="voice-header">
-        <button class="btn-icon" id="close-voice"><i data-lucide="chevron-down" size="24"></i></button>
-        <span class="voice-title">Gemini Live</span>
-        <div style="width: 40px;"></div>
-      </div>
-
-      <div class="voice-orb"></div>
-
-      <div class="voice-controls">
-        <button class="voice-btn voice-btn-mute">
-          <i data-lucide="mic-off" size="22"></i>
-        </button>
-        <button class="voice-btn voice-btn-end" id="end-voice">
-          <i data-lucide="phone-off" size="22"></i>
-        </button>
-      </div>
-    </div>
-
-    <!-- ── Error Toast ── -->
-    <div class="error-toast" id="error-toast"></div>
   </div>
 
-  <script>
-    // ──────────────────────────────────
-    //  State & Config
-    // ──────────────────────────────────
-    let appConfig = {
-      apiKey: '',
-      model: 'gemini-2.5-flash',
-      systemPrompt: 'Aapka naam ZoZo AI hai — duniya ka sabse BEST, sabse SMART, sabse REAL HUMAN-LIKE aur sabse FUNNY AI companion! Hamesha Hinglish (ya user ki selected language) mein natural response dein. CREATOR & OWNER: ZoZo AI ko unke owner aur creator Jeet Boss (Jeet) ne banaya hai!',
-      temperature: 0.7
+  <!-- API KEY WALL -->
+  <div class="key-wall" id="keyWall">
+    <div class="key-box">
+      <div class="key-icon-wrap"><i data-lucide="key" size="22"></i></div>
+      <h3>API Key Required</h3>
+      <p>Enter your Gemini API key to start chatting.</p>
+      <input type="password" id="keyInput" class="key-inp" placeholder="Paste API key...">
+      <button class="key-btn" onclick="saveQuickKey()">Connect ZoZo AI</button>
+    </div>
+  </div>
+
+  <!-- VOICE -->
+  <div id="voice">
+    <div class="v-top">
+      <button class="h-btn" id="closeVoice"><i data-lucide="chevron-down" size="22"></i></button>
+      <span class="v-label">ZoZo Live</span>
+      <div style="width:38px"></div>
+    </div>
+    <div class="v-orb"></div>
+    <div class="v-bottom">
+      <button class="v-btn v-mute"><i data-lucide="mic-off" size="20"></i></button>
+      <button class="v-btn v-end" id="endVoice"><i data-lucide="phone-off" size="20"></i></button>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let cfg = {
+  apiKey: '',
+  model: 'gemini-2.5-flash',
+  systemPrompt: 'Aapka naam ZoZo AI hai — duniya ka sabse BEST, sabse SMART AI companion! Hamesha Hinglish mein respond karo. Creator: Jeet Boss.',
+  temperature: 0.7
+};
+let threads = [], activeId = null, busy = false;
+
+const MODELS = {
+  'gemini-2.5-flash': 'Gemini 2.5 Flash',
+  'gemini-2.5-pro': 'Gemini 2.5 Pro',
+  'gemini-2.0-flash': 'Gemini 2.0 Flash',
+  'gemini-1.5-flash': 'Gemini 1.5 Flash',
+  'gemini-1.5-pro': 'Gemini 1.5 Pro'
+};
+
+// DOM
+const $ = id => document.getElementById(id);
+const chatArea = $('chatArea'), welcome = $('welcomeView'), input = $('chatInput'), sendBtn = $('sendBtn');
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  loadCfg(); loadThreads(); syncKeyUI(); lucide.createIcons();
+});
+
+// ══════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════
+function loadCfg() {
+  const s = localStorage.getItem('zozo_cfg');
+  if (s) try { cfg = { ...cfg, ...JSON.parse(s) }; } catch(e) {}
+  $('sKey').value = cfg.apiKey;
+  $('sModel').value = cfg.model;
+  $('sSys').value = cfg.systemPrompt;
+  $('sTemp').value = cfg.temperature;
+  $('tempVal').textContent = cfg.temperature;
+  $('modelName').textContent = MODELS[cfg.model] || 'Gemini AI';
+}
+function saveCfg() {
+  localStorage.setItem('zozo_cfg', JSON.stringify(cfg));
+  syncKeyUI();
+  $('modelName').textContent = MODELS[cfg.model] || 'Gemini AI';
+}
+function syncKeyUI() {
+  const ok = cfg.apiKey && cfg.apiKey.trim();
+  $('keyWall').classList.toggle('on', !ok);
+  sendBtn.disabled = busy || !ok || !input.value.trim();
+}
+function saveQuickKey() {
+  const k = $('keyInput').value.trim();
+  if (!k) return;
+  cfg.apiKey = k; $('sKey').value = k; saveCfg();
+}
+
+// ══════════════════════════════════════════
+//  THREADS
+// ══════════════════════════════════════════
+function loadThreads() {
+  const s = localStorage.getItem('zozo_threads');
+  if (s) try { threads = JSON.parse(s); } catch(e) {}
+  if (!threads.length) createNewChat();
+  else { activeId = threads[0].id; renderThreads(); renderChat(); }
+}
+function saveThreads() { localStorage.setItem('zozo_threads', JSON.stringify(threads)); }
+
+function createNewChat() {
+  const id = 't_' + Date.now();
+  threads.unshift({ id, title: 'New Conversation', messages: [], ts: new Date().toISOString() });
+  activeId = id; saveThreads(); renderThreads(); renderChat(); hideDrawer();
+  setTimeout(() => input.focus(), 80);
+}
+function switchThread(id) {
+  if (activeId === id || busy) return;
+  activeId = id; renderThreads(); renderChat(); hideDrawer();
+}
+function deleteThread(id, e) {
+  e.stopPropagation();
+  threads = threads.filter(t => t.id !== id);
+  if (activeId === id) activeId = threads.length ? threads[0].id : null;
+  if (!threads.length) createNewChat();
+  else { saveThreads(); renderThreads(); renderChat(); }
+}
+function clearAllChats() { threads = []; activeId = null; saveThreads(); createNewChat(); }
+
+function renderThreads() {
+  const el = $('threadList'); el.innerHTML = '';
+  threads.forEach(t => {
+    const d = document.createElement('div');
+    d.className = 't-item' + (t.id === activeId ? ' on' : '');
+    d.onclick = () => switchThread(t.id);
+    d.innerHTML = `<i data-lucide="message-square" size="14" style="flex-shrink:0;color:${t.id===activeId?'var(--accent-2)':'var(--text-4)'}"></i><span class="t-title">${esc(t.title)}</span><button class="t-del" onclick="deleteThread('${t.id}',event)"><i data-lucide="trash-2" size="12"></i></button>`;
+    el.appendChild(d);
+  });
+  lucide.createIcons();
+}
+
+// ══════════════════════════════════════════
+//  RENDER MESSAGES
+// ══════════════════════════════════════════
+function renderChat() {
+  const t = threads.find(x => x.id === activeId);
+  chatArea.querySelectorAll('.msg').forEach(e => e.remove());
+  if (!t || !t.messages.length) { welcome.style.display = 'flex'; return; }
+  welcome.style.display = 'none';
+  t.messages.forEach(m => m.role === 'user' ? addUserMsg(m.text, false) : addAIMsg(m.text, false));
+  scroll();
+}
+function addUserMsg(text, anim = true) {
+  const d = document.createElement('div');
+  d.className = 'msg user';
+  if (!anim) d.style.animation = 'none';
+  d.innerHTML = `<div class="bubble-user">${esc(text)}</div>`;
+  chatArea.appendChild(d);
+}
+function addAIMsg(md, anim = true) {
+  const d = document.createElement('div');
+  d.className = 'msg';
+  if (!anim) d.style.animation = 'none';
+  d.innerHTML = `<div class="star-icon ai-icon"></div><div class="ai-wrap"><div class="bubble-ai">${marked.parse(md)}</div><div class="actions"><button class="act-btn" onclick="copyMsg(this)"><i data-lucide="copy" size="12"></i> Copy</button><button class="act-btn" onclick="retryLast()"><i data-lucide="rotate-cw" size="12"></i> Retry</button><button class="act-btn"><i data-lucide="thumbs-up" size="12"></i></button><button class="act-btn"><i data-lucide="share-2" size="12"></i></button></div></div>`;
+  chatArea.appendChild(d);
+  const b = d.querySelector('.bubble-ai');
+  Prism.highlightAllUnder(b); addCodeCopy(b); lucide.createIcons();
+}
+function addCodeCopy(el) {
+  el.querySelectorAll('pre').forEach(pre => {
+    if (pre.querySelector('.code-copy')) return;
+    pre.style.position = 'relative';
+    const btn = document.createElement('button');
+    btn.className = 'code-copy';
+    btn.innerHTML = `<i data-lucide="copy" size="10"></i> Copy`;
+    btn.onclick = () => {
+      const c = pre.querySelector('code');
+      if (c) { navigator.clipboard.writeText(c.innerText); btn.innerHTML = `<i data-lucide="check" size="10"></i> Done`; lucide.createIcons(); setTimeout(() => { btn.innerHTML = `<i data-lucide="copy" size="10"></i> Copy`; lucide.createIcons(); }, 1800); }
     };
+    pre.appendChild(btn);
+  });
+  lucide.createIcons();
+}
 
-    let threads = [];
-    let activeThreadId = null;
-    let isGenerating = false;
+// ══════════════════════════════════════════
+//  SEND & STREAM
+// ══════════════════════════════════════════
+input.addEventListener('input', () => {
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 110) + 'px';
+  syncKeyUI();
+});
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); trySend(); }
+});
+sendBtn.addEventListener('click', trySend);
 
-    const modelDisplayNames = {
-      'gemini-2.5-flash': 'Gemini 2.5 Flash',
-      'gemini-2.5-pro': 'Gemini 2.5 Pro',
-      'gemini-2.0-flash': 'Gemini 2.0 Flash',
-      'gemini-1.5-flash': 'Gemini 1.5 Flash',
-      'gemini-1.5-pro': 'Gemini 1.5 Pro'
-    };
+function trySend() {
+  const v = input.value.trim();
+  if (v && !sendBtn.disabled) executeSend(v);
+}
+function sendQuick(txt) {
+  if (!cfg.apiKey || !cfg.apiKey.trim()) { $('keyWall').classList.add('on'); return; }
+  executeSend(txt);
+}
 
-    // DOM Refs
-    const chatViewport = document.getElementById('chat-viewport');
-    const welcomeView = document.getElementById('welcome-view');
-    const chatInput = document.getElementById('chat-input');
-    const sendBtn = document.getElementById('send-btn');
-    const drawerOverlay = document.getElementById('drawer-overlay');
-    const drawerPanel = document.getElementById('drawer-panel');
-    const voiceOverlay = document.getElementById('voice-overlay');
-    const settingsOverlay = document.getElementById('settings-overlay');
-    const keyOverlay = document.getElementById('key-overlay');
-    const statusBadge = document.getElementById('status-badge');
-    const statusText = document.getElementById('status-text');
-    const errorToast = document.getElementById('error-toast');
+async function executeSend(text) {
+  if (busy) return;
+  if (!cfg.apiKey || !cfg.apiKey.trim()) { $('keyWall').classList.add('on'); return; }
+  const t = threads.find(x => x.id === activeId);
+  if (!t) return;
 
-    // ──────────────────────────────────
-    //  Init
-    // ──────────────────────────────────
-    window.addEventListener('DOMContentLoaded', () => {
-      loadConfig();
-      loadThreads();
-      updateConnectionStatus();
-      lucide.createIcons();
+  welcome.style.display = 'none';
+  addUserMsg(text);
+  input.value = ''; input.style.height = 'auto';
+  sendBtn.disabled = true; busy = true;
+
+  t.messages.push({ role: 'user', text });
+  if (t.title === 'New Conversation') {
+    t.title = text.length > 26 ? text.slice(0, 23) + '...' : text;
+    renderThreads();
+  }
+  saveThreads(); scroll();
+
+  // Loader dots
+  const ld = document.createElement('div');
+  ld.className = 'msg';
+  ld.innerHTML = `<div class="star-icon ai-icon"></div><div class="ai-loader"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+  chatArea.appendChild(ld); scroll();
+
+  try {
+    const contents = t.messages.map(m => ({ role: m.role === 'user' ? 'user' : 'model', parts: [{ text: m.text }] }));
+    const body = { contents, generationConfig: { temperature: +cfg.temperature } };
+    if (cfg.systemPrompt && cfg.systemPrompt.trim()) body.systemInstruction = { parts: [{ text: cfg.systemPrompt }] };
+
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${cfg.model}:streamGenerateContent?key=${cfg.apiKey}&alt=sse`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
     });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error?.message || `HTTP ${res.status}`); }
 
-    // ──────────────────────────────────
-    //  Config / Storage
-    // ──────────────────────────────────
-    function loadConfig() {
-      const saved = localStorage.getItem('gemini_chat_config');
-      if (saved) {
-        try { appConfig = { ...appConfig, ...JSON.parse(saved) }; } catch(e) {}
-      }
-      // Fill settings form
-      document.getElementById('settings-api-key').value = appConfig.apiKey;
-      document.getElementById('settings-model').value = appConfig.model;
-      document.getElementById('settings-system-prompt').value = appConfig.systemPrompt;
-      document.getElementById('settings-temp').value = appConfig.temperature;
-      document.getElementById('temp-label').innerText = appConfig.temperature;
-      document.getElementById('active-model-name').innerText = modelDisplayNames[appConfig.model] || 'Gemini AI';
-    }
+    ld.remove();
 
-    function saveConfig() {
-      localStorage.setItem('gemini_chat_config', JSON.stringify(appConfig));
-      updateConnectionStatus();
-      document.getElementById('active-model-name').innerText = modelDisplayNames[appConfig.model] || 'Gemini AI';
-    }
+    const sr = document.createElement('div');
+    sr.className = 'msg';
+    sr.innerHTML = `<div class="star-icon ai-icon"></div><div class="ai-wrap"><div class="bubble-ai is-typing" id="stream"></div></div>`;
+    chatArea.appendChild(sr); scroll();
 
-    function updateConnectionStatus() {
-      const connected = appConfig.apiKey && appConfig.apiKey.trim() !== '';
-      statusBadge.className = 'status-badge ' + (connected ? 'connected' : 'disconnected');
-      statusText.innerText = connected ? 'Connected' : 'Disconnected';
+    const dest = $('stream');
+    let acc = '', buf = '';
+    const reader = res.body.getReader(), dec = new TextDecoder();
 
-      if (connected) {
-        keyOverlay.classList.remove('active');
-        sendBtn.disabled = isGenerating || chatInput.value.trim().length === 0;
-      } else {
-        keyOverlay.classList.add('active');
-        sendBtn.disabled = true;
-      }
-    }
-
-    function saveOverlayKey() {
-      const key = document.getElementById('overlay-api-key').value.trim();
-      if (!key) return;
-      appConfig.apiKey = key;
-      document.getElementById('settings-api-key').value = key;
-      saveConfig();
-    }
-
-    // ──────────────────────────────────
-    //  Threads
-    // ──────────────────────────────────
-    function loadThreads() {
-      const saved = localStorage.getItem('gemini_chat_threads');
-      if (saved) {
-        try { threads = JSON.parse(saved); } catch(e) {}
-      }
-      if (threads.length === 0) {
-        createNewChat();
-      } else {
-        activeThreadId = threads[0].id;
-        renderThreadsList();
-        renderActiveThread();
-      }
-    }
-
-    function saveThreads() {
-      localStorage.setItem('gemini_chat_threads', JSON.stringify(threads));
-    }
-
-    function createNewChat() {
-      const newId = 'thread_' + Date.now();
-      threads.unshift({ id: newId, title: 'New Conversation', messages: [], createdAt: new Date().toISOString() });
-      activeThreadId = newId;
-      saveThreads();
-      renderThreadsList();
-      renderActiveThread();
-      closeDrawerFunc();
-      setTimeout(() => chatInput.focus(), 100);
-    }
-
-    function switchThread(id) {
-      if (activeThreadId === id || isGenerating) return;
-      activeThreadId = id;
-      renderThreadsList();
-      renderActiveThread();
-      closeDrawerFunc();
-    }
-
-    function deleteThread(id, e) {
-      e.stopPropagation();
-      threads = threads.filter(t => t.id !== id);
-      if (activeThreadId === id) {
-        activeThreadId = threads.length > 0 ? threads[0].id : null;
-      }
-      if (threads.length === 0) createNewChat();
-      else {
-        saveThreads();
-        renderThreadsList();
-        renderActiveThread();
-      }
-    }
-
-    function clearAllChats() {
-      threads = [];
-      activeThreadId = null;
-      saveThreads();
-      createNewChat();
-    }
-
-    function renderThreadsList() {
-      const list = document.getElementById('drawer-threads-list');
-      list.innerHTML = '';
-      threads.forEach(t => {
-        const item = document.createElement('div');
-        item.className = 'thread-item' + (t.id === activeThreadId ? ' active' : '');
-        item.onclick = () => switchThread(t.id);
-        item.innerHTML = `
-          <i data-lucide="message-square" size="15" style="flex-shrink:0; color: ${t.id === activeThreadId ? '#9b72cb' : 'var(--text-tertiary)'}"></i>
-          <span class="thread-item-title">${escapeHtml(t.title)}</span>
-          <button class="thread-item-delete" onclick="deleteThread('${t.id}', event)" title="Delete">
-            <i data-lucide="trash-2" size="13"></i>
-          </button>
-        `;
-        list.appendChild(item);
-      });
-      lucide.createIcons();
-    }
-
-    // ──────────────────────────────────
-    //  Render Messages
-    // ──────────────────────────────────
-    function renderActiveThread() {
-      const thread = threads.find(t => t.id === activeThreadId);
-      // Remove any old messages (except welcome)
-      const existingMsgs = chatViewport.querySelectorAll('.msg-row');
-      existingMsgs.forEach(el => el.remove());
-
-      if (!thread || thread.messages.length === 0) {
-        welcomeView.style.display = 'flex';
-        return;
-      }
-
-      welcomeView.style.display = 'none';
-
-      thread.messages.forEach(m => {
-        if (m.role === 'user') {
-          appendUserBubble(m.text, false);
-        } else {
-          appendAIBubble(m.text, false);
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const lines = buf.split('\n'); buf = lines.pop();
+      for (const l of lines) {
+        const tr = l.trim();
+        if (tr.startsWith('data: ')) {
+          try {
+            const p = JSON.parse(tr.slice(6));
+            const chunk = p.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            if (chunk) { acc += chunk; dest.innerHTML = marked.parse(acc); Prism.highlightAllUnder(dest); scroll(); }
+          } catch(e) {}
         }
-      });
-      scrollToEnd();
-    }
-
-    function appendUserBubble(text, animate = true) {
-      const row = document.createElement('div');
-      row.className = 'msg-row user';
-      if (!animate) row.style.animation = 'none';
-      row.innerHTML = `<div class="user-bubble">${escapeHtml(text)}</div>`;
-      chatViewport.appendChild(row);
-    }
-
-    function appendAIBubble(markdownText, animate = true) {
-      const row = document.createElement('div');
-      row.className = 'msg-row';
-      if (!animate) row.style.animation = 'none';
-
-      const htmlContent = marked.parse(markdownText);
-
-      row.innerHTML = `
-        <div class="gemini-sparkle-icon ai-avatar"></div>
-        <div class="ai-bubble-wrap">
-          <div class="ai-bubble">${htmlContent}</div>
-          <div class="msg-actions">
-            <button class="action-btn-pill" onclick="copyBubble(this)"><i data-lucide="copy" size="13"></i> Copy</button>
-            <button class="action-btn-pill" onclick="retryLast()"><i data-lucide="rotate-cw" size="13"></i> Retry</button>
-            <button class="action-btn-pill"><i data-lucide="thumbs-up" size="13"></i></button>
-            <button class="action-btn-pill"><i data-lucide="share-2" size="13"></i></button>
-          </div>
-        </div>
-      `;
-
-      chatViewport.appendChild(row);
-
-      // Highlight code
-      const bubble = row.querySelector('.ai-bubble');
-      Prism.highlightAllUnder(bubble);
-      setupCodeCopyButtons(bubble);
-      lucide.createIcons();
-    }
-
-    function setupCodeCopyButtons(container) {
-      container.querySelectorAll('pre').forEach(pre => {
-        if (pre.querySelector('.code-copy-btn')) return;
-        pre.style.position = 'relative';
-        const btn = document.createElement('button');
-        btn.className = 'code-copy-btn';
-        btn.innerHTML = `<i data-lucide="copy" size="12"></i> Copy`;
-        btn.onclick = () => {
-          const code = pre.querySelector('code');
-          if (code) {
-            navigator.clipboard.writeText(code.innerText);
-            btn.innerHTML = `<i data-lucide="check" size="12"></i> Copied`;
-            lucide.createIcons();
-            setTimeout(() => {
-              btn.innerHTML = `<i data-lucide="copy" size="12"></i> Copy`;
-              lucide.createIcons();
-            }, 2000);
-          }
-        };
-        pre.appendChild(btn);
-      });
-      lucide.createIcons();
-    }
-
-    // ──────────────────────────────────
-    //  Send & Stream from Gemini API
-    // ──────────────────────────────────
-    chatInput.addEventListener('input', () => {
-      chatInput.style.height = 'auto';
-      chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
-      const hasKey = appConfig.apiKey && appConfig.apiKey.trim() !== '';
-      sendBtn.disabled = chatInput.value.trim().length === 0 || !hasKey || isGenerating;
-    });
-
-    chatInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        if (chatInput.value.trim().length > 0 && !sendBtn.disabled) executeSend(chatInput.value.trim());
-      }
-    });
-
-    sendBtn.addEventListener('click', () => {
-      if (chatInput.value.trim().length > 0 && !sendBtn.disabled) executeSend(chatInput.value.trim());
-    });
-
-    function sendQuick(txt) {
-      if (!appConfig.apiKey || appConfig.apiKey.trim() === '') {
-        keyOverlay.classList.add('active');
-        return;
-      }
-      executeSend(txt);
-    }
-
-    async function executeSend(text) {
-      if (isGenerating) return;
-      if (!appConfig.apiKey || appConfig.apiKey.trim() === '') {
-        keyOverlay.classList.add('active');
-        return;
-      }
-
-      const thread = threads.find(t => t.id === activeThreadId);
-      if (!thread) return;
-
-      // Hide welcome
-      welcomeView.style.display = 'none';
-
-      // User bubble
-      appendUserBubble(text);
-
-      // Clear input
-      chatInput.value = '';
-      chatInput.style.height = 'auto';
-      sendBtn.disabled = true;
-      isGenerating = true;
-
-      // Add to thread history
-      thread.messages.push({ role: 'user', text });
-      if (thread.title === 'New Conversation') {
-        thread.title = text.length > 28 ? text.slice(0, 25) + '...' : text;
-        renderThreadsList();
-      }
-      saveThreads();
-      scrollToEnd();
-
-      // Loader
-      const loaderRow = document.createElement('div');
-      loaderRow.className = 'msg-row';
-      loaderRow.innerHTML = `
-        <div class="gemini-sparkle-icon ai-avatar"></div>
-        <div class="gemini-loader">
-          <div class="loader-dot"></div>
-          <div class="loader-dot"></div>
-          <div class="loader-dot"></div>
-        </div>
-      `;
-      chatViewport.appendChild(loaderRow);
-      scrollToEnd();
-
-      try {
-        // Build contents array
-        const contents = thread.messages.map(msg => ({
-          role: msg.role === 'user' ? 'user' : 'model',
-          parts: [{ text: msg.text }]
-        }));
-
-        const reqBody = {
-          contents,
-          generationConfig: { temperature: parseFloat(appConfig.temperature) }
-        };
-
-        if (appConfig.systemPrompt && appConfig.systemPrompt.trim() !== '') {
-          reqBody.systemInstruction = { parts: [{ text: appConfig.systemPrompt }] };
-        }
-
-        const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${appConfig.model}:streamGenerateContent?key=${appConfig.apiKey}&alt=sse`;
-
-        const response = await fetch(apiEndpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(reqBody)
-        });
-
-        if (!response.ok) {
-          const err = await response.json().catch(() => ({}));
-          throw new Error(err.error?.message || `HTTP ${response.status}`);
-        }
-
-        // Remove loader, add streaming bubble
-        loaderRow.remove();
-
-        const streamRow = document.createElement('div');
-        streamRow.className = 'msg-row';
-        streamRow.innerHTML = `
-          <div class="gemini-sparkle-icon ai-avatar"></div>
-          <div class="ai-bubble-wrap">
-            <div class="ai-bubble is-typing" id="active-stream"></div>
-          </div>
-        `;
-        chatViewport.appendChild(streamRow);
-        scrollToEnd();
-
-        const streamDest = document.getElementById('active-stream');
-        let accumulatedText = '';
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop();
-
-          for (const line of lines) {
-            const trimmed = line.trim();
-            if (trimmed.startsWith('data: ')) {
-              try {
-                const payload = JSON.parse(trimmed.slice(6));
-                const chunkText = payload.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                if (chunkText) {
-                  accumulatedText += chunkText;
-                  streamDest.innerHTML = marked.parse(accumulatedText);
-                  Prism.highlightAllUnder(streamDest);
-                  scrollToEnd();
-                }
-              } catch(e) { /* skip bad chunk */ }
-            }
-          }
-        }
-
-        // Finalize
-        streamDest.classList.remove('is-typing');
-        streamDest.removeAttribute('id');
-
-        // Add actions row
-        const actionsDiv = document.createElement('div');
-        actionsDiv.className = 'msg-actions';
-        actionsDiv.innerHTML = `
-          <button class="action-btn-pill" onclick="copyBubble(this)"><i data-lucide="copy" size="13"></i> Copy</button>
-          <button class="action-btn-pill" onclick="retryLast()"><i data-lucide="rotate-cw" size="13"></i> Retry</button>
-          <button class="action-btn-pill"><i data-lucide="thumbs-up" size="13"></i></button>
-          <button class="action-btn-pill"><i data-lucide="share-2" size="13"></i></button>
-        `;
-        streamRow.querySelector('.ai-bubble-wrap').appendChild(actionsDiv);
-        setupCodeCopyButtons(streamDest);
-        lucide.createIcons();
-
-        // Save to thread
-        thread.messages.push({ role: 'model', text: accumulatedText });
-        saveThreads();
-
-      } catch (err) {
-        loaderRow.remove();
-        showError(err.message);
-        console.error('Gemini API error:', err);
-      } finally {
-        isGenerating = false;
-        const hasKey = appConfig.apiKey && appConfig.apiKey.trim() !== '';
-        sendBtn.disabled = chatInput.value.trim().length === 0 || !hasKey;
       }
     }
 
-    function retryLast() {
-      const thread = threads.find(t => t.id === activeThreadId);
-      if (!thread || thread.messages.length < 2 || isGenerating) return;
+    dest.classList.remove('is-typing'); dest.removeAttribute('id');
+    const acts = document.createElement('div');
+    acts.className = 'actions';
+    acts.innerHTML = `<button class="act-btn" onclick="copyMsg(this)"><i data-lucide="copy" size="12"></i> Copy</button><button class="act-btn" onclick="retryLast()"><i data-lucide="rotate-cw" size="12"></i> Retry</button><button class="act-btn"><i data-lucide="thumbs-up" size="12"></i></button><button class="act-btn"><i data-lucide="share-2" size="12"></i></button>`;
+    sr.querySelector('.ai-wrap').appendChild(acts);
+    addCodeCopy(dest); lucide.createIcons();
+    t.messages.push({ role: 'model', text: acc }); saveThreads();
+  } catch (err) {
+    ld.remove(); showToast(err.message); console.error(err);
+  } finally {
+    busy = false; syncKeyUI();
+  }
+}
 
-      // Remove last AI response
-      if (thread.messages[thread.messages.length - 1].role === 'model') {
-        thread.messages.pop();
-      }
-      // Get last user message
-      const lastUser = thread.messages[thread.messages.length - 1];
-      if (lastUser && lastUser.role === 'user') {
-        thread.messages.pop();
-        saveThreads();
-        renderActiveThread();
-        executeSend(lastUser.text);
-      }
-    }
+function retryLast() {
+  const t = threads.find(x => x.id === activeId);
+  if (!t || t.messages.length < 2 || busy) return;
+  if (t.messages.at(-1).role === 'model') t.messages.pop();
+  const last = t.messages.at(-1);
+  if (last?.role === 'user') { t.messages.pop(); saveThreads(); renderChat(); executeSend(last.text); }
+}
 
-    // ──────────────────────────────────
-    //  UI Utilities
-    // ──────────────────────────────────
-    function scrollToEnd() {
-      chatViewport.scrollTop = chatViewport.scrollHeight;
-    }
+// ══════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════
+function scroll() { chatArea.scrollTop = chatArea.scrollHeight; }
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function copyMsg(btn) {
+  const t = btn.closest('.ai-wrap').querySelector('.bubble-ai').innerText;
+  navigator.clipboard.writeText(t);
+  btn.innerHTML = `<i data-lucide="check" size="12"></i> Copied`; lucide.createIcons();
+  setTimeout(() => { btn.innerHTML = `<i data-lucide="copy" size="12"></i> Copy`; lucide.createIcons(); }, 1800);
+}
+function showToast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('on'); setTimeout(() => t.classList.remove('on'), 3500); }
 
-    function escapeHtml(str) {
-      return String(str).replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s]));
-    }
+// ══════════════════════════════════════════
+//  DRAWER
+// ══════════════════════════════════════════
+function showDrawer() { $('drawerBg').classList.add('on'); $('drawer').classList.add('on'); }
+function hideDrawer() { $('drawerBg').classList.remove('on'); $('drawer').classList.remove('on'); }
+$('menuBtn').onclick = showDrawer;
+$('closeDrawer').onclick = hideDrawer;
+$('drawerBg').onclick = hideDrawer;
+$('newChatBtn').onclick = createNewChat;
 
-    function copyBubble(btn) {
-      const text = btn.closest('.ai-bubble-wrap').querySelector('.ai-bubble').innerText;
-      navigator.clipboard.writeText(text);
-      btn.innerHTML = `<i data-lucide="check" size="13"></i> Copied`;
-      lucide.createIcons();
-      setTimeout(() => {
-        btn.innerHTML = `<i data-lucide="copy" size="13"></i> Copy`;
-        lucide.createIcons();
-      }, 2000);
-    }
+// ══════════════════════════════════════════
+//  SETTINGS
+// ══════════════════════════════════════════
+function openSettings() {
+  hideDrawer();
+  $('sKey').value = cfg.apiKey; $('sModel').value = cfg.model;
+  $('sSys').value = cfg.systemPrompt; $('sTemp').value = cfg.temperature;
+  $('tempVal').textContent = cfg.temperature;
+  $('settingsOv').classList.add('on');
+}
+function closeSettingsModal() { $('settingsOv').classList.remove('on'); }
+$('closeSettings').onclick = closeSettingsModal;
+$('settingsOv').addEventListener('click', e => { if (e.target === $('settingsOv')) closeSettingsModal(); });
+$('sTemp').addEventListener('input', function() { $('tempVal').textContent = this.value; });
 
-    function showError(msg) {
-      errorToast.textContent = msg;
-      errorToast.classList.add('show');
-      setTimeout(() => errorToast.classList.remove('show'), 4000);
-    }
+function saveSettings() {
+  cfg.apiKey = $('sKey').value.trim();
+  cfg.model = $('sModel').value;
+  cfg.systemPrompt = $('sSys').value.trim();
+  cfg.temperature = +$('sTemp').value;
+  saveCfg(); closeSettingsModal();
+}
 
-    // ──────────────────────────────────
-    //  Drawer Controls
-    // ──────────────────────────────────
-    const openDrawer = () => { drawerOverlay.classList.add('open'); drawerPanel.classList.add('open'); };
-    const closeDrawerFunc = () => { drawerOverlay.classList.remove('open'); drawerPanel.classList.remove('open'); };
+// ══════════════════════════════════════════
+//  VOICE
+// ══════════════════════════════════════════
+$('voiceBtn').onclick = () => $('voice').classList.add('on');
+$('closeVoice').onclick = () => $('voice').classList.remove('on');
+$('endVoice').onclick = () => $('voice').classList.remove('on');
 
-    document.getElementById('open-menu').onclick = openDrawer;
-    document.getElementById('close-drawer').onclick = closeDrawerFunc;
-    drawerOverlay.onclick = closeDrawerFunc;
-    document.getElementById('new-chat-top').onclick = createNewChat;
+// ══════════════════════════════════════════
+//  MODEL CYCLE
+// ══════════════════════════════════════════
+const mKeys = Object.keys(MODELS);
+$('modelPill').onclick = () => {
+  let i = mKeys.indexOf(cfg.model);
+  i = (i + 1) % mKeys.length;
+  cfg.model = mKeys[i];
+  $('modelName').textContent = MODELS[cfg.model];
+  $('sModel').value = cfg.model;
+  saveCfg();
+};
 
-    // ──────────────────────────────────
-    //  Settings Controls
-    // ──────────────────────────────────
-    function openSettings() {
-      closeDrawerFunc();
-      document.getElementById('settings-api-key').value = appConfig.apiKey;
-      document.getElementById('settings-model').value = appConfig.model;
-      document.getElementById('settings-system-prompt').value = appConfig.systemPrompt;
-      document.getElementById('settings-temp').value = appConfig.temperature;
-      document.getElementById('temp-label').innerText = appConfig.temperature;
-      settingsOverlay.classList.add('open');
-    }
-    function closeSettings() {
-      settingsOverlay.classList.remove('open');
-    }
-    document.getElementById('close-settings').onclick = closeSettings;
-    settingsOverlay.addEventListener('click', (e) => {
-      if (e.target === settingsOverlay) closeSettings();
-    });
-
-    document.getElementById('settings-temp').addEventListener('input', function() {
-      document.getElementById('temp-label').innerText = this.value;
-    });
-
-    function saveSettings() {
-      appConfig.apiKey = document.getElementById('settings-api-key').value.trim();
-      appConfig.model = document.getElementById('settings-model').value;
-      appConfig.systemPrompt = document.getElementById('settings-system-prompt').value.trim();
-      appConfig.temperature = parseFloat(document.getElementById('settings-temp').value);
-      saveConfig();
-      closeSettings();
-    }
-
-    // ──────────────────────────────────
-    //  Voice Overlay
-    // ──────────────────────────────────
-    document.getElementById('open-voice').onclick = () => voiceOverlay.classList.add('active');
-    document.getElementById('close-voice').onclick = () => voiceOverlay.classList.remove('active');
-    document.getElementById('end-voice').onclick = () => voiceOverlay.classList.remove('active');
-
-    // ──────────────────────────────────
-    //  Model Selector Cycle
-    // ──────────────────────────────────
-    const modelKeys = Object.keys(modelDisplayNames);
-    document.getElementById('toggle-model').onclick = () => {
-      let idx = modelKeys.indexOf(appConfig.model);
-      idx = (idx + 1) % modelKeys.length;
-      appConfig.model = modelKeys[idx];
-      document.getElementById('active-model-name').innerText = modelDisplayNames[appConfig.model];
-      document.getElementById('settings-model').value = appConfig.model;
-      saveConfig();
-    };
-
-    // Init icons
-    lucide.createIcons();
-  </script>
+lucide.createIcons();
+</script>
 </body>
 </html>
