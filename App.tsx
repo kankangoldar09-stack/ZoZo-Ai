@@ -75,6 +75,54 @@ interface Message {
   isError?: boolean;
 }
 
+interface MarkdownCodeBlockProps {
+  className?: string;
+  children: React.ReactNode;
+}
+
+const MarkdownCodeBlock: React.FC<MarkdownCodeBlockProps> = ({ className, children, ...props }) => {
+  const match = /language-(\w+)/.exec(className || "");
+  const codeContent = String(children).replace(/\n$/, "");
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(codeContent);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  if (match) {
+    return (
+      <div className="relative group my-3 rounded-xl overflow-hidden border border-white/5 shadow-lg select-text text-left">
+        <div className="flex items-center justify-between px-4 py-2 bg-[#090d16]/90 border-b border-white/5 text-xs text-slate-400 select-none">
+          <span className="font-mono">{match[1]}</span>
+          <button
+            onClick={handleCopy}
+            className="flex items-center gap-1 hover:text-white transition-colors cursor-pointer"
+          >
+            {copied ? "Copied!" : "Copy"}
+          </button>
+        </div>
+        <SyntaxHighlighter
+          style={vscDarkPlus}
+          language={match[1]}
+          PreTag="div"
+          customStyle={{ margin: 0, padding: '16px', background: '#090d16' }}
+          {...props}
+        >
+          {codeContent}
+        </SyntaxHighlighter>
+      </div>
+    );
+  }
+
+  return (
+    <code className={className} {...props}>
+      {children}
+    </code>
+  );
+};
+
 const App: React.FC = () => {
   const [isPreviewFrameEnabled, setIsPreviewFrameEnabled] = useState(true);
 
@@ -1786,7 +1834,7 @@ Formatting:
                         <button
                           key={i}
                           onClick={() => setChatInput(sug.text)}
-                          className="p-3.5 bg-[#17181c]/90 hover:bg-[#1f2026] border border-white/10 rounded-2xl text-left transition-all hover:border-[#2e6eff]/50 hover:shadow-lg hover:shadow-[#2e6eff]/10 flex items-start gap-3 group"
+                          className="p-3.5 bg-white/[0.02] hover:bg-white/5 border border-white/5 hover:border-[#2e6eff]/30 rounded-2xl text-left transition-all hover:scale-[1.01] hover:shadow-lg shadow-md flex items-start gap-3 group"
                         >
                           <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                             {sug.icon}
@@ -1827,8 +1875,8 @@ Formatting:
                       <div
                         className={
                           m.role === "user"
-                            ? "user-msg bg-[#2e6eff] text-white px-4 py-3 rounded-2xl shadow-md"
-                            : "model-msg bg-[#17181c] border border-white/10 p-4 md:p-5 rounded-2xl shadow-lg"
+                            ? "user-msg bg-gradient-to-r from-[#2e6eff]/10 to-[#8ab4f8]/10 border border-[#2e6eff]/20 text-[#e3e3e3] px-4 py-3 rounded-2xl shadow-md backdrop-blur-xs select-text"
+                            : "model-msg bg-white/[0.02] border border-white/5 p-4 md:p-5 rounded-2xl shadow-lg backdrop-blur-xs select-text"
                         }
                       >
                         <div className="markdown-body text-[0.92rem] leading-relaxed text-[#e3e3e3]">
@@ -1842,18 +1890,10 @@ Formatting:
                                 children,
                                 ...props
                               }: any) {
-                                const match = /language-(\w+)/.exec(
-                                  className || "",
-                                );
-                                return !inline && match ? (
-                                  <SyntaxHighlighter
-                                    style={vscDarkPlus}
-                                    language={match[1]}
-                                    PreTag="div"
-                                    {...props}
-                                  >
-                                    {String(children).replace(/\n$/, "")}
-                                  </SyntaxHighlighter>
+                                return !inline ? (
+                                  <MarkdownCodeBlock className={className} {...props}>
+                                    {children}
+                                  </MarkdownCodeBlock>
                                 ) : (
                                   <code className={className} {...props}>
                                     {children}
@@ -1943,9 +1983,24 @@ Formatting:
                     <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#2e6eff] to-[#7bddff] flex items-center justify-center shrink-0 mt-1 shadow-md">
                       <Zap className="w-4 h-4 text-white" fill="currentColor" />
                     </div>
-                    <div className="model-msg bg-[#17181c] border border-white/10 p-4 md:p-5 rounded-2xl shadow-lg max-w-[85%] md:max-w-[80%]">
+                    <div className="model-msg bg-white/[0.02] border border-white/5 p-4 md:p-5 rounded-2xl shadow-lg max-w-[85%] md:max-w-[80%] backdrop-blur-xs select-text">
                       <div className="markdown-body text-[0.92rem] text-[#e3e3e3] is-typing">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        <ReactMarkdown 
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            code({ node, inline, className, children, ...props }: any) {
+                              return !inline ? (
+                                <MarkdownCodeBlock className={className} {...props}>
+                                  {children}
+                                </MarkdownCodeBlock>
+                              ) : (
+                                <code className={className} {...props}>
+                                  {children}
+                                </code>
+                              );
+                            }
+                          }}
+                        >
                           {streamingText}
                         </ReactMarkdown>
                       </div>
@@ -2027,7 +2082,7 @@ Formatting:
                 </button>
               </div>
 
-              <div className="bg-[#17181c]/95 border border-white/15 rounded-2xl p-2 md:p-3 shadow-2xl flex items-end gap-2 backdrop-blur-xl">
+              <div className="bg-white/[0.03] border border-white/10 focus-within:border-[#2e6eff]/50 focus-within:ring-1 focus-within:ring-[#2e6eff]/30 shadow-2xl rounded-2xl p-2 md:p-3 flex items-end gap-2 backdrop-blur-xl transition-all">
                 {/* 3-Points / 3-Dots Drawer Trigger Button in Input Bar */}
                 <button
                   onClick={() => setIsDrawerOpen(true)}
