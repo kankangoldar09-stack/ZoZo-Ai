@@ -26,36 +26,37 @@
        FUTURISTIC NEON-GLASS THEME TOKENS
     ═══════════════════════════════════════ */
     :root {
-      --bg-darkest: #030305;
-      --bg-darker: #08080f;
-      --bg-dark: #0d0d16;
-      --bg-glass: rgba(8, 8, 15, 0.85);
-      --bg-glass-elevated: rgba(255, 255, 255, 0.03);
-      --bg-glass-active: rgba(255, 255, 255, 0.06);
+      --bg-darkest: #05050a;
+      --bg-darker: #0b0b14;
+      --bg-dark: #121226;
+      --bg-glass: rgba(11, 11, 20, 0.75);
+      --bg-glass-elevated: rgba(255, 255, 255, 0.04);
+      --bg-glass-active: rgba(255, 255, 255, 0.08);
 
       --color-cyan: #00f0ff;
-      --color-violet: #8b5cf6;
+      --color-violet: #a855f7;
       --color-pink: #ec4899;
       --color-green: #10b981;
+      --color-amber: #f59e0b;
       
       --gradient-primary: linear-gradient(135deg, var(--color-cyan) 0%, var(--color-violet) 50%, var(--color-pink) 100%);
-      --gradient-glow: rgba(139, 92, 246, 0.22);
+      --gradient-glow: rgba(168, 85, 247, 0.22);
       --gradient-border: linear-gradient(90deg, var(--color-cyan), var(--color-violet), var(--color-pink), var(--color-cyan));
 
-      --border-subtle: rgba(255, 255, 255, 0.05);
+      --border-subtle: rgba(255, 255, 255, 0.04);
       --border-glow: rgba(0, 240, 255, 0.15);
-      --border-bright: rgba(255, 255, 255, 0.12);
+      --border-bright: rgba(255, 255, 255, 0.1);
 
       --t-white: #ffffff;
-      --t-primary: #e2e8f0;
-      --t-secondary: #94a3b8;
-      --t-muted: #475569;
-      --t-dim: #334155;
+      --t-primary: #f1f5f9;
+      --t-secondary: #cbd5e1;
+      --t-muted: #64748b;
+      --t-dim: #475569;
 
-      --radius-sm: 10px;
-      --radius-md: 16px;
-      --radius-lg: 24px;
-      --radius-xl: 32px;
+      --radius-sm: 12px;
+      --radius-md: 18px;
+      --radius-lg: 28px;
+      --radius-xl: 36px;
       --radius-pill: 9999px;
 
       --safe-t: env(safe-area-inset-top, 0px);
@@ -76,7 +77,7 @@
 
     body {
       font-family: 'Inter', -apple-system, system-ui, sans-serif;
-      background: #000000;
+      background: radial-gradient(circle at 50% 50%, #0d0b21 0%, #030308 100%);
       color: var(--t-primary);
       height: 100dvh;
       width: 100vw;
@@ -101,18 +102,84 @@
       display: flex;
       flex-direction: column;
       box-shadow: 0 0 100px rgba(0, 0, 0, 0.95);
+      transition: all 0.5s var(--smooth-transition);
+    }
+
+    /* Simulated Status Bar & Notch - hidden on mobile */
+    .simulated-status-bar {
+      display: none;
+    }
+    .simulated-notch {
+      display: none;
     }
 
     @media (min-width: 500px) {
-      #phone-container {
-        height: 94dvh;
-        border-radius: 46px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
+      #phone-container:not(.fullscreen-mode) {
+        height: 92dvh;
+        border-radius: 48px;
+        border: 12px solid #1c1c24;
+        outline: 2px solid rgba(255, 255, 255, 0.12);
         box-shadow: 
-          0 0 0 1px rgba(255, 255, 255, 0.03),
+          0 0 0 1px rgba(255, 255, 255, 0.05),
           0 20px 80px -10px rgba(0, 0, 0, 0.9),
-          0 0 150px rgba(139, 92, 246, 0.15);
+          0 0 120px rgba(168, 85, 247, 0.15);
       }
+
+      /* Simulated Status Bar & Notch for simulated phone style */
+      #phone-container:not(.fullscreen-mode) .simulated-status-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 30px 2px;
+        background: var(--bg-glass);
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--t-white);
+        z-index: 100;
+        font-family: 'Space Grotesk', sans-serif;
+      }
+      
+      #phone-container:not(.fullscreen-mode) .simulated-notch {
+        display: block;
+        position: absolute;
+        top: 6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 110px;
+        height: 26px;
+        background: #000000;
+        border-radius: 13px;
+        z-index: 110;
+        box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      #phone-container:not(.fullscreen-mode) .simulated-notch::before {
+        content: '';
+        position: absolute;
+        left: 16px;
+        top: 9px;
+        width: 8px;
+        height: 8px;
+        background: #0e0d29;
+        border-radius: 50%;
+        box-shadow: inset 0 0 3px rgba(0, 240, 255, 0.5);
+      }
+    }
+
+    /* Fullscreen layout mode */
+    #phone-container.fullscreen-mode {
+      max-width: none !important;
+      height: 100dvh !important;
+      width: 100vw !important;
+      border: none !important;
+      outline: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+    #phone-container.fullscreen-mode .simulated-status-bar,
+    #phone-container.fullscreen-mode .simulated-notch {
+      display: none !important;
     }
 
     /* ═══════════════════════════════════════
@@ -121,17 +188,17 @@
     .fluid-orb {
       position: absolute;
       border-radius: 50%;
-      filter: blur(80px);
+      filter: blur(100px);
       pointer-events: none;
       z-index: 0;
-      opacity: 0.65;
+      opacity: 0.55;
     }
     .orb-top-right {
       top: -120px;
       right: -80px;
       width: 320px;
       height: 320px;
-      background: radial-gradient(circle, rgba(0, 240, 255, 0.16) 0%, rgba(139, 92, 246, 0.08) 50%, transparent 70%);
+      background: radial-gradient(circle, rgba(0, 240, 255, 0.22) 0%, rgba(168, 85, 247, 0.12) 50%, transparent 70%);
       animation: driftOrb 12s ease-in-out infinite alternate;
     }
     .orb-bottom-left {
@@ -139,7 +206,7 @@
       left: -80px;
       width: 280px;
       height: 280px;
-      background: radial-gradient(circle, rgba(236, 72, 153, 0.14) 0%, rgba(139, 92, 246, 0.06) 60%, transparent 80%);
+      background: radial-gradient(circle, rgba(236, 72, 153, 0.18) 0%, rgba(168, 85, 247, 0.08) 60%, transparent 80%);
       animation: driftOrb-b 14s ease-in-out infinite alternate;
     }
     @keyframes driftOrb {
@@ -159,7 +226,7 @@
     .hdr {
       position: relative;
       z-index: 30;
-      padding: calc(var(--safe-t) + 12px) 16px 12px;
+      padding: 14px 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -182,18 +249,26 @@
       transition: all 0.2s var(--smooth-transition);
       flex-shrink: 0;
     }
-    .hdr-btn:active {
+    .hdr-btn:hover {
       background: var(--bg-glass-elevated);
       color: var(--t-white);
-      transform: scale(0.92);
+    }
+    .hdr-btn:active {
+      transform: scale(0.9);
+    }
+
+    .hdr-right-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     /* Brand Selector Pill */
-    .brand-selector {
+    .brand-pill {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 16px 6px 10px;
+      padding: 6px 14px 6px 10px;
       border-radius: var(--radius-pill);
       background: var(--bg-glass-elevated);
       border: 1px solid var(--border-subtle);
@@ -201,7 +276,7 @@
       position: relative;
       transition: all 0.3s var(--smooth-transition);
     }
-    .brand-selector::after {
+    .brand-pill::after {
       content: '';
       position: absolute;
       inset: 0;
@@ -214,10 +289,14 @@
       opacity: 0;
       transition: opacity 0.3s;
     }
-    .brand-selector:hover::after {
+    .brand-pill:hover::after {
       opacity: 0.7;
     }
-    .brand-selector:active {
+    .brand-pill:hover {
+      background: var(--bg-glass-active);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+    }
+    .brand-pill:active {
       transform: scale(0.96);
     }
 
@@ -244,16 +323,26 @@
       flex: 1;
       overflow-y: auto;
       overflow-x: hidden;
-      padding: 20px 18px;
+      padding: 24px 20px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 24px;
       z-index: 10;
       scroll-behavior: smooth;
       overscroll-behavior: contain;
     }
     .viewport::-webkit-scrollbar {
-      width: 0px;
+      width: 6px;
+    }
+    .viewport::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .viewport::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-pill);
+    }
+    .viewport::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.12);
     }
 
     /* ═══════════════════════════════════════
@@ -266,7 +355,7 @@
       justify-content: center;
       text-align: center;
       flex: 1;
-      padding: 10px 0;
+      padding: 20px 0;
       animation: welcomeReveal 0.8s var(--smooth-transition);
     }
     @keyframes welcomeReveal {
@@ -275,13 +364,13 @@
     }
 
     .welcome-star-glowing {
-      width: 72px;
-      height: 72px;
+      width: 80px;
+      height: 80px;
       background: var(--gradient-primary);
       -webkit-mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C12 6.627 6.627 12 0 12c6.627 0 12 5.627 12 12 0-6.627 5.627-12 12-12-6.627 0-12-5.627-12-12z"/></svg>') no-repeat center / contain;
       mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C12 6.627 6.627 12 0 12c6.627 0 12 5.627 12 12 0-6.627 5.627-12 12-12-6.627 0-12-5.627-12-12z"/></svg>') no-repeat center / contain;
       margin-bottom: 24px;
-      filter: drop-shadow(0 0 24px rgba(0, 240, 255, 0.5)) drop-shadow(0 0 48px rgba(139, 92, 246, 0.3));
+      filter: drop-shadow(0 0 24px rgba(0, 240, 255, 0.5)) drop-shadow(0 0 48px rgba(168, 85, 247, 0.3));
       animation: welcomeStarFloat 4s ease-in-out infinite;
     }
     @keyframes welcomeStarFloat {
@@ -291,40 +380,46 @@
 
     .welcome-screen h1 {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 32px;
+      font-size: 34px;
       font-weight: 800;
       letter-spacing: -1.2px;
       line-height: 1.15;
       color: var(--t-white);
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
     .welcome-screen h1 span {
       background: var(--gradient-primary);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      filter: drop-shadow(0 2px 8px rgba(0, 240, 255, 0.15));
+      filter: drop-shadow(0 2px 8px rgba(0, 240, 255, 0.2));
     }
     .welcome-screen .subtitle {
-      font-size: 14px;
+      font-size: 14.5px;
       color: var(--t-secondary);
       line-height: 1.5;
-      max-width: 280px;
+      max-width: 320px;
       margin-bottom: 36px;
     }
 
-    /* Vertical Suggestion Chips */
+    /* Responsive Grid for Suggestions */
     .suggestion-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
       width: 100%;
     }
+    @media (min-width: 400px) {
+      .suggestion-list {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    
     .suggestion-item {
       display: flex;
       align-items: center;
       gap: 14px;
-      padding: 14px 18px;
+      padding: 16px;
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
@@ -332,6 +427,7 @@
       transition: all 0.25s var(--smooth-transition);
       position: relative;
       overflow: hidden;
+      text-align: left;
     }
     .suggestion-item::before {
       content: '';
@@ -342,12 +438,16 @@
       opacity: 0;
       transition: opacity 0.25s;
     }
+    .suggestion-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(0, 240, 255, 0.25);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
     .suggestion-item:active {
       transform: scale(0.97);
-      background: rgba(255, 255, 255, 0.05);
-      border-color: var(--border-bright);
     }
-    .suggestion-item:hover::before, .suggestion-item:active::before {
+    .suggestion-item:hover::before {
       opacity: 1;
     }
 
@@ -360,30 +460,30 @@
       justify-content: center;
       flex-shrink: 0;
     }
-    .suggestion-icon-box.purple { background: rgba(139, 92, 246, 0.12); color: var(--color-violet); }
+    .suggestion-icon-box.purple { background: rgba(168, 85, 247, 0.12); color: var(--color-violet); }
     .suggestion-icon-box.cyan { background: rgba(0, 240, 255, 0.1); color: var(--color-cyan); }
     .suggestion-icon-box.pink { background: rgba(236, 72, 153, 0.1); color: var(--color-pink); }
     .suggestion-icon-box.green { background: rgba(16, 185, 129, 0.1); color: var(--color-green); }
 
     .suggestion-text {
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 500;
       color: var(--t-primary);
       flex: 1;
-      text-align: left;
+      line-height: 1.4;
     }
     .suggestion-arrow {
       color: var(--t-muted);
       flex-shrink: 0;
       transition: transform 0.2s;
     }
-    .suggestion-item:hover .suggestion-arrow, .suggestion-item:active .suggestion-arrow {
+    .suggestion-item:hover .suggestion-arrow {
       transform: translateX(3px);
       color: var(--t-primary);
     }
 
     /* ═══════════════════════════════════════
-       MESSAGE RENDERING
+       MESSAGE RENDERING (GLASS CARD REDESIGN)
     ═══════════════════════════════════════ */
     .msg-row {
       display: flex;
@@ -399,45 +499,48 @@
       justify-content: flex-end;
     }
 
-    /* User Bubble */
+    /* User Bubble with Neon-Tint Glass Gradient */
     .user-bubble {
-      background: var(--bg-dark);
-      border: 1px solid var(--border-bright);
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.18) 0%, rgba(0, 240, 255, 0.05) 100%);
+      border: 1px solid rgba(0, 240, 255, 0.25);
       color: var(--t-white);
-      padding: 12px 18px;
-      border-radius: 20px 20px 4px 20px;
+      padding: 14px 20px;
+      border-radius: 22px 22px 4px 22px;
       font-size: 14.5px;
-      line-height: 1.55;
-      max-width: 82%;
+      line-height: 1.6;
+      max-width: 80%;
       user-select: text;
       word-wrap: break-word;
       position: relative;
-    }
-    .user-bubble::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      background: linear-gradient(135deg, rgba(0, 240, 255, 0.03) 0%, rgba(139, 92, 246, 0.03) 100%);
-      pointer-events: none;
+      box-shadow: 0 4px 15px rgba(0, 240, 255, 0.05);
     }
 
     /* AI Avatar */
     .ai-avatar-icon {
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      height: 28px;
       flex-shrink: 0;
-      margin-top: 3px;
+      margin-top: 4px;
+      filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.5));
     }
+    
+    /* AI Bubble Container Styled as a Glassmorphic Panel */
     .ai-bubble-container {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
       min-width: 0;
+      background: rgba(255, 255, 255, 0.015);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
     }
 
-    /* AI Bubble */
+    /* AI Bubble Inner Content */
     .ai-bubble {
       color: var(--t-primary);
       font-size: 14.5px;
@@ -450,81 +553,80 @@
       font-family: 'Space Grotesk', sans-serif;
       font-weight: 700;
       color: var(--t-white);
-      margin: 14px 0 6px;
+      margin: 18px 0 8px;
     }
     .ai-bubble h1 { font-size: 18px; }
     .ai-bubble h2 { font-size: 16px; }
     .ai-bubble h3 { font-size: 15px; }
-    .ai-bubble p { margin-bottom: 8px; }
+    .ai-bubble p { margin-bottom: 10px; }
     .ai-bubble p:last-child { margin-bottom: 0; }
-    .ai-bubble ul, .ai-bubble ol { margin: 8px 0; padding-left: 20px; }
-    .ai-bubble li { margin-bottom: 4px; }
+    .ai-bubble ul, .ai-bubble ol { margin: 10px 0; padding-left: 20px; }
+    .ai-bubble li { margin-bottom: 6px; }
     .ai-bubble strong { color: var(--t-white); font-weight: 600; }
     .ai-bubble a { color: var(--color-cyan); text-decoration: underline; text-underline-offset: 2px; }
+    
     .ai-bubble blockquote {
       border-left: 3px solid var(--color-violet);
-      padding: 6px 14px;
-      margin: 10px 0;
+      padding: 8px 16px;
+      margin: 12px 0;
       color: var(--t-secondary);
       font-style: italic;
-      background: rgba(139, 92, 246, 0.04);
+      background: rgba(168, 85, 247, 0.04);
       border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
     }
+    
     .ai-bubble code:not(pre code) {
       background: rgba(255, 255, 255, 0.08);
-      padding: 2px 6px;
-      border-radius: 5px;
+      padding: 3px 7px;
+      border-radius: 6px;
       font-family: 'JetBrains Mono', monospace;
       font-size: 12.5px;
       color: var(--color-cyan);
+      border: 1px solid rgba(255, 255, 255, 0.04);
     }
+    
+    /* Code block container layout */
     .ai-bubble pre {
-      margin: 12px 0;
-      background: #000000 !important;
-      border: 1px solid var(--border-subtle);
+      margin: 14px 0;
+      background: #090912 !important;
+      border: 1px solid var(--border-bright);
       border-radius: var(--radius-md);
       overflow: hidden;
       position: relative;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
     }
     .ai-bubble pre code {
       display: block;
       padding: 14px 16px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
+      font-size: 12.5px;
       line-height: 1.6;
       color: #e2e8f0;
       overflow-x: auto;
       background: transparent !important;
     }
 
-    .code-action-copy {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-subtle);
-      border-radius: 8px;
-      color: var(--t-secondary);
-      padding: 5px 10px;
-      font-size: 11px;
-      font-family: 'JetBrains Mono', monospace;
-      cursor: pointer;
+    /* Code Header */
+    .code-block-header {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 5px;
-      transition: all 0.15s;
-      z-index: 5;
-    }
-    .code-action-copy:hover {
-      background: rgba(255, 255, 255, 0.12);
-      color: var(--t-white);
+      background: rgba(255, 255, 255, 0.03);
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 11px;
+      color: var(--t-secondary);
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.5px;
     }
 
     /* Actions Strip */
     .bubble-actions-strip {
       display: flex;
       gap: 14px;
-      padding-top: 2px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.03);
     }
     .bubble-action-btn {
       background: none;
@@ -539,19 +641,19 @@
       transition: color 0.15s;
       padding: 4px 0;
     }
-    .bubble-action-btn:active, .bubble-action-btn:hover {
+    .bubble-action-btn:hover {
       color: var(--t-primary);
     }
 
     /* Live Typings & Loaders */
     .stream-loader {
       display: inline-flex;
-      gap: 5px;
-      padding: 6px 0;
+      gap: 6px;
+      padding: 8px 0;
     }
     .loader-circle {
-      width: 7px;
-      height: 7px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background: var(--gradient-primary);
       animation: jumpCircle 1.4s ease-in-out infinite both;
@@ -574,35 +676,42 @@
     }
 
     /* ═══════════════════════════════════════
-       COMPOSER ZONE
+       COMPOSER ZONE (FLOATING PANEL)
     ═══════════════════════════════════════ */
     .composer {
-      padding: 6px 12px calc(var(--safe-b) + 8px);
-      background: linear-gradient(to top, var(--bg-darkest) 80%, transparent 100%);
+      padding: 12px 18px calc(var(--safe-b) + 16px);
+      background: transparent;
       z-index: 20;
     }
     .composer-pill {
-      background: var(--bg-dark);
+      background: rgba(15, 15, 32, 0.75);
       border: 1px solid var(--border-bright);
       border-radius: var(--radius-xl);
-      padding: 5px 6px;
+      padding: 6px 10px;
       display: flex;
       align-items: flex-end;
-      gap: 4px;
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-      transition: border-color 0.25s, box-shadow 0.25s;
+      gap: 6px;
+      box-shadow: 
+        0 10px 40px rgba(0, 0, 0, 0.65),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
     }
     .composer-pill:focus-within {
       border-color: rgba(0, 240, 255, 0.45);
-      box-shadow: 0 0 20px rgba(0, 240, 255, 0.12), 0 4px 30px rgba(0, 0, 0, 0.5);
+      box-shadow: 
+        0 0 25px rgba(0, 240, 255, 0.15),
+        0 10px 40px rgba(0, 0, 0, 0.65);
+      background: rgba(15, 15, 32, 0.9);
     }
     .composer-btn {
-      width: 34px;
-      height: 34px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       background: transparent;
       border: none;
-      color: var(--t-muted);
+      color: var(--t-secondary);
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -610,8 +719,11 @@
       transition: all 0.15s;
       flex-shrink: 0;
     }
-    .composer-btn:active {
+    .composer-btn:hover {
       color: var(--t-white);
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .composer-btn:active {
       transform: scale(0.9);
     }
     .composer-input {
@@ -623,15 +735,16 @@
       font-family: inherit;
       font-size: 14.5px;
       line-height: 22px;
-      max-height: 100px;
+      max-height: 120px;
       min-height: 22px;
       resize: none;
-      padding: 6px 6px;
+      padding: 7px 6px;
       user-select: text;
     }
     .composer-input::placeholder {
       color: var(--t-muted);
     }
+    
     .composer-send-btn {
       width: 36px;
       height: 36px;
@@ -645,7 +758,7 @@
       cursor: pointer;
       flex-shrink: 0;
       transition: all 0.25s var(--smooth-transition);
-      box-shadow: 0 2px 14px rgba(0, 240, 255, 0.3);
+      box-shadow: 0 4px 15px rgba(0, 240, 255, 0.35);
     }
     .composer-send-btn:disabled {
       background: var(--bg-glass-elevated);
@@ -710,7 +823,7 @@
 
     .drawer-new-chat-btn {
       width: 100%;
-      padding: 11px 14px;
+      padding: 12px 14px;
       border-radius: var(--radius-md);
       background: rgba(0, 240, 255, 0.06);
       border: 1px solid rgba(0, 240, 255, 0.15);
@@ -798,6 +911,507 @@
     }
 
     .drawer-ftr {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .drawer-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      font-size: 13px;
+      color: var(--t-secondary);
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: none;
+      font-family: inherit;
+      width: 100%;
+      transition: all 0.12s;
+    }
+    .drawer-link:hover {
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--t-primary);
+    }
+
+    /* ═══════════════════════════════════════
+       SETTINGS COMPONENT
+    ═══════════════════════════════════════ */
+    .settings-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s var(--smooth-transition);
+    }
+    .settings-overlay.active { opacity: 1; pointer-events: auto; }
+
+    .settings-card {
+      width: 100%;
+      max-width: 340px;
+      background: var(--bg-darker);
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transform: scale(0.9) translateY(16px);
+      transition: transform 0.3s var(--smooth-transition);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+    }
+    .settings-overlay.active .settings-card { transform: scale(1) translateY(0); }
+
+    .settings-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .settings-hdr h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .settings-row { display: flex; flex-direction: column; gap: 4px; }
+    .settings-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--t-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .settings-input-field {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      outline: none;
+      color: var(--t-primary);
+      font-family: inherit;
+      font-size: 13.5px;
+      transition: border 0.15s;
+    }
+    .settings-input-field:focus { border-color: rgba(0, 240, 255, 0.4); }
+    
+    .settings-select-field {
+      width: 100%;
+      background: var(--bg-dark);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      outline: none;
+      color: var(--t-primary);
+      font-family: inherit;
+      font-size: 13.5px;
+      cursor: pointer;
+    }
+    
+    .settings-textarea-field {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      outline: none;
+      color: var(--t-primary);
+      font-family: inherit;
+      font-size: 13.5px;
+      resize: none;
+      min-height: 52px;
+      line-height: 1.45;
+    }
+
+    .slider-info { display: flex; justify-content: space-between; align-items: center; }
+    .slider-val { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--color-cyan); font-weight: 600; }
+    
+    .settings-actions { display: flex; gap: 10px; padding-top: 4px; }
+    .settings-cancel-btn {
+      flex: 1; padding: 10px; border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle);
+      color: var(--t-secondary); font-weight: 600; font-size: 12.5px;
+      cursor: pointer; font-family: inherit; transition: all 0.12s;
+    }
+    .settings-cancel-btn:hover { background: rgba(255, 255, 255, 0.06); color: var(--t-white); }
+    .settings-save-btn {
+      flex: 1; padding: 10px; border-radius: var(--radius-sm);
+      background: var(--gradient-primary); border: none;
+      color: var(--t-white); font-weight: 700; font-size: 12.5px;
+      cursor: pointer; font-family: inherit; transition: all 0.15s;
+      box-shadow: 0 4px 16px rgba(168, 85, 247, 0.35);
+    }
+    .settings-save-btn:active { transform: scale(0.96); }
+
+    /* ═══════════════════════════════════════
+       API KEY BARRIER
+    ═══════════════════════════════════════ */
+    .key-barrier {
+      position: absolute;
+      inset: 0;
+      background: rgba(3, 3, 5, 0.95);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      z-index: 35;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .key-barrier.active { opacity: 1; pointer-events: auto; }
+
+    .key-modal {
+      background: var(--bg-darker);
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      max-width: 320px;
+      width: 100%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    }
+    .key-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-sm);
+      background: rgba(251, 191, 36, 0.06);
+      border: 1px solid rgba(251, 191, 36, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      color: #fbbf24;
+    }
+    .key-modal h3 { font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 700; }
+    .key-modal p { font-size: 13.5px; color: var(--t-secondary); line-height: 1.45; }
+    .key-input-field {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 11px 14px;
+      outline: none;
+      color: var(--t-white);
+      font-family: inherit;
+      font-size: 14px;
+      text-align: center;
+    }
+    .key-input-field:focus { border-color: rgba(0, 240, 255, 0.4); }
+    .key-connect-btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      background: var(--gradient-primary);
+      border: none;
+      color: var(--t-white);
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: inherit;
+      box-shadow: 0 4px 18px rgba(0, 240, 255, 0.3);
+      transition: all 0.15s;
+    }
+    .key-connect-btn:active { transform: scale(0.97); }
+
+    /* ═══════════════════════════════════════
+       VOICE SCREEN (CYBERPUNK STYLE WITH VISUALIZER WAVES)
+    ═══════════════════════════════════════ */
+    #voice-overlay {
+      position: absolute;
+      inset: 0;
+      background: var(--bg-darkest);
+      z-index: 70;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: calc(var(--safe-t) + 14px) 20px calc(var(--safe-b) + 20px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+    }
+    #voice-overlay.active { opacity: 1; pointer-events: auto; }
+
+    .voice-hdr {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .voice-hdr-lbl { font-size: 13.5px; font-weight: 600; color: var(--t-muted); }
+
+    /* Voice Visualizer waves replacing the old mesh-orb */
+    .voice-visualizer-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      height: 120px;
+      margin: auto;
+    }
+    .voice-wave-bar {
+      width: 6px;
+      height: 20px;
+      background: var(--gradient-primary);
+      border-radius: var(--radius-pill);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+      animation: voiceBounce 1.2s ease-in-out infinite alternate;
+    }
+    .voice-wave-bar.bar-1 { height: 30px; animation-delay: 0.1s; }
+    .voice-wave-bar.bar-2 { height: 60px; animation-delay: 0.3s; }
+    .voice-wave-bar.bar-3 { height: 90px; animation-delay: 0.5s; }
+    .voice-wave-bar.bar-4 { height: 40px; animation-delay: 0.2s; }
+    .voice-wave-bar.bar-5 { height: 75px; animation-delay: 0.4s; }
+    .voice-wave-bar.bar-6 { height: 50px; animation-delay: 0.6s; }
+    .voice-wave-bar.bar-7 { height: 30px; animation-delay: 0.15s; }
+    
+    @keyframes voiceBounce {
+      0% { transform: scaleY(0.3); }
+      100% { transform: scaleY(1.3); }
+    }
+
+    .voice-actions { display: flex; justify-content: center; gap: 24px; }
+    .voice-control-btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .voice-control-btn:active { transform: scale(0.88); }
+    .voice-control-btn.mute {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-subtle) !important;
+      color: var(--t-secondary);
+    }
+    .voice-control-btn.disconnect {
+      background: #ef4444;
+      color: var(--t-white);
+    }
+
+    /* Error Toast */
+    .error-toast {
+      position: absolute;
+      bottom: 84px;
+      left: 50%;
+      transform: translateX(-50%) translateY(14px);
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.22);
+      color: #f87171;
+      padding: 9px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 12.5px;
+      z-index: 40;
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s var(--smooth-transition);
+      max-width: 85%;
+      text-align: center;
+    }
+    .error-toast.active { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+  </style>
+</head>
+<body>
+
+<div id="phone-container">
+  <!-- Simulated Notch & Status Bar for Desktop Viewport -->
+  <div class="simulated-notch"></div>
+  <div class="simulated-status-bar">
+    <span class="simulated-time">20:50</span>
+    <div style="display: flex; gap: 6px; align-items: center;">
+      <i data-lucide="signal" size="11"></i>
+      <i data-lucide="wifi" size="11"></i>
+      <i data-lucide="battery" size="12"></i>
+    </div>
+  </div>
+
+  <div class="fluid-orb orb-top-right"></div>
+  <div class="fluid-orb orb-bottom-left"></div>
+
+  <!-- HEADER -->
+  <header class="hdr">
+    <button class="hdr-btn" id="menuTriggerBtn" aria-label="Open Sidebar"><i data-lucide="menu" size="19"></i></button>
+    <div class="brand-pill" id="modelCycleBtn">
+      <div class="brand-star"></div>
+      <span class="brand-title" id="activeModelLabel">Gemini 2.5 Flash</span>
+      <i data-lucide="chevron-down" size="12" style="color:var(--t-muted)"></i>
+    </div>
+    <div class="hdr-right-actions">
+      <button class="hdr-btn" id="layoutToggleBtn" title="Toggle Desktop/Mobile layout"><i data-lucide="monitor" size="19"></i></button>
+      <button class="hdr-btn" id="quickNewChatBtn" aria-label="New Conversation"><i data-lucide="square-pen" size="19"></i></button>
+    </div>
+  </header>
+
+  <!-- CHAT AREA -->
+  <main class="viewport" id="chatArea">
+    <!-- Welcome screen / Empty state -->
+    <div class="welcome-screen" id="welcomeView">
+      <div class="welcome-star-glowing"></div>
+      <h1>Hello, <span>Jeet</span> ✨</h1>
+      <p class="subtitle">What projects or ideas would you like to elevate today?</p>
+      
+      <div class="suggestion-list">
+        <div class="suggestion-item" onclick="submitPrebuilt('Code a responsive navbar in HTML/CSS')">
+          <div class="suggestion-icon-box purple"><i data-lucide="code-2" size="16"></i></div>
+          <span class="suggestion-text">Code a responsive navigation bar</span>
+          <i data-lucide="arrow-right" size="14" class="suggestion-arrow"></i>
+        </div>
+        <div class="suggestion-item" onclick="submitPrebuilt('Explain asynchronous JavaScript and Event Loop')">
+          <div class="suggestion-icon-box cyan"><i data-lucide="zap" size="16"></i></div>
+          <span class="suggestion-text">Explain JS Event Loop simply</span>
+          <i data-lucide="arrow-right" size="14" class="suggestion-arrow"></i>
+        </div>
+        <div class="suggestion-item" onclick="submitPrebuilt('Write a high-converting landing page copy')">
+          <div class="suggestion-icon-box pink"><i data-lucide="feather" size="16"></i></div>
+          <span class="suggestion-text">Write copy for a landing page</span>
+          <i data-lucide="arrow-right" size="14" class="suggestion-arrow"></i>
+        </div>
+        <div class="suggestion-item" onclick="submitPrebuilt('Brainstorm 3 creative game development mechanics')">
+          <div class="suggestion-icon-box green"><i data-lucide="gamepad-2" size="16"></i></div>
+          <span class="suggestion-text">Brainstorm new game mechanics</span>
+          <i data-lucide="arrow-right" size="14" class="suggestion-arrow"></i>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- BOTTOM COMPOSER -->
+  <footer class="composer">
+    <div class="composer-pill">
+      <button class="composer-btn" title="Add Media"><i data-lucide="camera" size="18"></i></button>
+      <textarea id="composerTextInput" class="composer-input" placeholder="Ask ZoZo AI..." rows="1"></textarea>
+      <button class="composer-btn" id="voiceOpenBtn" title="Speak to AI"><i data-lucide="mic" size="18"></i></button>
+      <button class="composer-send-btn" id="composerSendBtn" disabled title="Send"><i data-lucide="arrow-up" size="18"></i></button>
+    </div>
+  </footer>
+
+  <!-- SIDEBAR (DRAWER) -->
+  <div class="panel-backdrop" id="drawerBackdrop"></div>
+  <aside class="drawer-panel" id="drawerPanel">
+    <div class="drawer-hdr">
+      <div class="drawer-brand">
+        <div class="brand-star"></div>
+        <span>ZoZo AI</span>
+      </div>
+      <button class="hdr-btn" id="closeDrawerBtn"><i data-lucide="x" size="16"></i></button>
+    </div>
+    <button class="drawer-new-chat-btn" onclick="initializeNewThread()"><i data-lucide="plus" size="16"></i> New Conversation</button>
+    
+    <span class="drawer-sec-title">Recent Chats</span>
+    <div class="threads-scroll" id="threadsListContainer">
+      <!-- Injected threads -->
+    </div>
+
+    <div class="drawer-ftr">
+      <button class="drawer-link" onclick="clearAllStoredChats()"><i data-lucide="trash-2" size="14"></i> Clear All History</button>
+      <button class="drawer-link" onclick="openSettingsView()"><i data-lucide="settings" size="14"></i> Settings</button>
+    </div>
+  </aside>
+
+  <!-- SETTINGS MODAL -->
+  <div class="settings-overlay" id="settingsOverlay">
+    <div class="settings-card">
+      <div class="settings-hdr">
+        <h3><i data-lucide="sliders" size="15" style="color:var(--color-cyan)"></i> Configuration</h3>
+        <button class="hdr-btn" id="closeSettingsBtn" style="width:30px; height:30px;"><i data-lucide="x" size="14"></i></button>
+      </div>
+      
+      <div class="settings-row">
+        <label class="settings-label">Gemini API Key</label>
+        <input type="password" id="inputApiKey" class="settings-input-field" placeholder="Paste your API key here...">
+      </div>
+      
+      <div class="settings-row">
+        <label class="settings-label">AI Engine Model</label>
+        <select id="selectModel" class="settings-select-field">
+          <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+          <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+          <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+          <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+          <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+        </select>
+      </div>
+      
+      <div class="settings-row">
+        <label class="settings-label">System Instruction</label>
+        <textarea id="textareaSysPrompt" class="settings-textarea-field" rows="2" placeholder="Tell the model how to act..."></textarea>
+      </div>
+      
+      <div class="settings-row">
+        <div class="slider-info">
+          <label class="settings-label">Creativity (Temp)</label>
+          <span class="slider-val" id="valTemperature">0.7</span>
+        </div>
+        <input type="range" id="inputTemperature" min="0" max="2" step="0.1" value="0.7">
+      </div>
+      
+      <div class="settings-actions">
+        <button class="settings-cancel-btn" onclick="closeSettingsView()">Cancel</button>
+        <button class="settings-save-btn" onclick="commitSettings()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- API KEY BARRIER -->
+  <div class="key-barrier" id="keyBarrier">
+    <div class="key-modal">
+      <div class="key-badge"><i data-lucide="key" size="20"></i></div>
+      <h3>API Access Key</h3>
+      <p>Please enter your Gemini API access key to activate the chat interface.</p>
+      <input type="password" id="barrierKeyInput" class="key-input-field" placeholder="Enter API Key...">
+      <button class="key-connect-btn" onclick="connectOverlayKey()">Activate</button>
+    </div>
+  </div>
+
+  <!-- SPEAK SCREEN -->
+  <div id="voice-overlay">
+    <div class="voice-hdr">
+      <button class="hdr-btn" id="closeVoiceOverlayBtn"><i data-lucide="chevron-down" size="20"></i></button>
+      <span class="voice-hdr-lbl">ZoZo Live Mode</span>
+      <div style="width:36px"></div>
+    </div>
+    <!-- Interactive waveform visualization of voice -->
+    <div class="voice-visualizer-container">
+      <div class="voice-wave-bar bar-1"></div>
+      <div class="voice-wave-bar bar-2"></div>
+      <div class="voice-wave-bar bar-3"></div>
+      <div class="voice-wave-bar bar-4"></div>
+      <div class="voice-wave-bar bar-5"></div>
+      <div class="voice-wave-bar bar-6"></div>
+      <div class="voice-wave-bar bar-7"></div>
+    </div>
+    <div class="voice-actions">
+      <button class="voice-control-btn mute"><i data-lucide="mic-off" size="18"></i></button>
+      <button class="voice-control-btn disconnect" id="endVoiceSessionBtn"><i data-lucide="phone-off" size="18"></i></button>
+    </div>
+  </div>
+
+  <!-- ERROR TOAST -->
+  <div class="error-toast" id="errorToast"></div>
+</div>
       border-top: 1px solid var(--border-subtle);
       padding-top: 10px;
       display: flex;
@@ -1295,8 +1909,57 @@ window.addEventListener('DOMContentLoaded', () => {
   loadStoredConfig();
   loadStoredThreads();
   evaluateKeyStatus();
+  loadStoredLayoutMode();
+  updateSimulatedTime();
+  setInterval(updateSimulatedTime, 1000);
+  
+  const layoutToggleBtn = domId('layoutToggleBtn');
+  if (layoutToggleBtn) {
+    layoutToggleBtn.onclick = toggleLayoutMode;
+  }
+  
   lucide.createIcons();
 });
+
+// ══════════════════════════════════════════
+//  LAYOUT & STATUS UTILITIES
+// ══════════════════════════════════════════
+function toggleLayoutMode() {
+  const container = domId('phone-container');
+  const isFullscreen = container.classList.toggle('fullscreen-mode');
+  localStorage.setItem('zozo_layout_mode', isFullscreen ? 'fullscreen' : 'mobile');
+  
+  const iconBtn = domId('layoutToggleBtn');
+  if (iconBtn) {
+    iconBtn.innerHTML = isFullscreen 
+      ? `<i data-lucide="smartphone" size="19"></i>` 
+      : `<i data-lucide="monitor" size="19"></i>`;
+    lucide.createIcons();
+  }
+}
+
+function loadStoredLayoutMode() {
+  const mode = localStorage.getItem('zozo_layout_mode');
+  const container = domId('phone-container');
+  const iconBtn = domId('layoutToggleBtn');
+  if (mode === 'fullscreen') {
+    container.classList.add('fullscreen-mode');
+    if (iconBtn) iconBtn.innerHTML = `<i data-lucide="smartphone" size="19"></i>`;
+  } else {
+    container.classList.remove('fullscreen-mode');
+    if (iconBtn) iconBtn.innerHTML = `<i data-lucide="monitor" size="19"></i>`;
+  }
+}
+
+function updateSimulatedTime() {
+  const el = document.querySelector('.simulated-time');
+  if (el) {
+    const now = new Date();
+    const hrs = now.getHours().toString().padStart(2, '0');
+    const mins = now.getMinutes().toString().padStart(2, '0');
+    el.textContent = `${hrs}:${mins}`;
+  }
+}
 
 // ══════════════════════════════════════════
 //  CONFIGURATION CONTROLS
@@ -1475,24 +2138,42 @@ function appendAIBubbleToView(markdown, animate = true) {
 
 function setupCopyButtonsInPreBlocks(container) {
   container.querySelectorAll('pre').forEach(p => {
-    if (p.querySelector('.cc-btn')) return;
+    if (p.querySelector('.code-block-header')) return;
     p.style.position = 'relative';
-    const btn = document.createElement('button');
-    btn.className = 'cc-btn';
-    btn.innerHTML = `<i data-lucide="copy" size="9"></i> Copy`;
+    
+    const codeEl = p.querySelector('code');
+    let lang = 'CODE';
+    if (codeEl) {
+      const classes = Array.from(codeEl.classList);
+      const langClass = classes.find(c => c.startsWith('language-'));
+      if (langClass) {
+        lang = langClass.replace('language-', '').toUpperCase();
+      }
+    }
+    
+    const header = document.createElement('div');
+    header.className = 'code-block-header';
+    header.innerHTML = `
+      <span class="code-lang-label">${lang}</span>
+      <button class="cc-btn" style="background:none; border:none; color:var(--t-secondary); cursor:pointer; display:flex; align-items:center; gap:5px; font-size:11px; font-family:inherit; padding:0;">
+        <i data-lucide="copy" size="12"></i> Copy
+      </button>
+    `;
+    
+    const btn = header.querySelector('.cc-btn');
     btn.onclick = () => {
-      const code = p.querySelector('code');
-      if (code) {
-        navigator.clipboard.writeText(code.innerText);
-        btn.innerHTML = `<i data-lucide="check" size="9"></i> Copied`;
+      if (codeEl) {
+        navigator.clipboard.writeText(codeEl.innerText);
+        btn.innerHTML = `<i data-lucide="check" size="12"></i> Copied`;
         lucide.createIcons();
         setTimeout(() => {
-          btn.innerHTML = `<i data-lucide="copy" size="9"></i> Copy`;
+          btn.innerHTML = `<i data-lucide="copy" size="12"></i> Copy`;
           lucide.createIcons();
         }, 1500);
       }
     };
-    p.appendChild(btn);
+    
+    p.insertBefore(header, p.firstChild);
   });
   lucide.createIcons();
 }
