@@ -408,29 +408,7 @@ export const DrawerMenu: React.FC<DrawerMenuProps> = ({
             <ChevronRight className="w-4 h-4 text-[#9aa0a6] group-hover:translate-x-0.5 transition-transform" />
           </button>
 
-          {/* Fullscreen Toggle */}
-          <button
-            onClick={() => {
-              onToggleFullscreen();
-              onClose();
-            }}
-            className="w-full p-3 rounded-2xl flex items-center justify-between border border-white/5 bg-white/[0.02] hover:bg-white/[0.06] text-[#c4c7c5] hover:text-white transition-all text-left group"
-          >
-            <div className="flex items-center gap-3.5">
-              <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white">
-                {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-              </div>
-              <div>
-                <div className="text-xs font-bold text-white">
-                  {isFullscreen ? "Exit Fullscreen" : "Fullscreen Mode"}
-                </div>
-                <div className="text-[11px] text-[#9aa0a6]">
-                  {isFullscreen ? "Standard browser view" : "Immersive full screen view"}
-                </div>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-[#9aa0a6] group-hover:translate-x-0.5 transition-transform" />
-          </button>
+
         </div>
 
         {/* Drawer Footer */}

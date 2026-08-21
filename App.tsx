@@ -889,6 +889,10 @@ const App: React.FC = () => {
               const text = msg.serverContent.inputTranscription.text;
               if (text && text.trim() !== "") {
                 addLiveMessageChunk("user", text, false);
+                const wasCommand = executeVoiceCommand(text, true);
+                if (wasCommand) {
+                  return;
+                }
                 stopAllSpeech();
               }
             }
@@ -1185,6 +1189,157 @@ REAL HUMAN EXPRESSIONS & VOCAL MANNERISMS (ULTRA-REALISTIC HUMAN FEEL):
     }
   };
 
+  const executeVoiceCommand = (commandText: string, isLiveCall: boolean): boolean => {
+    const text = commandText.toLowerCase().trim();
+
+    // Helper to open link in system browser/app launcher
+    const openExternalLink = (url: string) => {
+      window.open(url, '_system');
+    };
+
+    // Helper to speak a confirmation
+    const speakConfirmation = (message: string) => {
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        try {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(message);
+          utterance.lang = "hi-IN";
+          window.speechSynthesis.speak(utterance);
+        } catch (e) {
+          console.error("Local TTS failed", e);
+        }
+      }
+    };
+
+    // 1. YouTube command
+    if (
+      text.includes("open youtube") || 
+      text.includes("youtube kholo") || 
+      text.includes("youtube chalao") || 
+      text.includes("youtube open") ||
+      text.includes("open youtube app")
+    ) {
+      if (isLiveCall) stopSession();
+      speakConfirmation("Ji boss, YouTube open kar raha hoon.");
+      openExternalLink("vnd.youtube://"); 
+      setTimeout(() => {
+        openExternalLink("https://www.youtube.com");
+      }, 400);
+      return true;
+    }
+
+    // 2. Instagram command
+    if (
+      text.includes("open instagram") || 
+      text.includes("instagram kholo") || 
+      text.includes("instagram open") ||
+      text.includes("open insta") ||
+      text.includes("insta kholo") ||
+      text.includes("instagram app")
+    ) {
+      if (isLiveCall) stopSession();
+      speakConfirmation("Haan boss, Instagram open kar raha hoon.");
+      openExternalLink("instagram://");
+      setTimeout(() => {
+        openExternalLink("https://www.instagram.com");
+      }, 400);
+      return true;
+    }
+
+    // 3. WhatsApp command
+    if (
+      text.includes("open whatsapp") || 
+      text.includes("whatsapp kholo") || 
+      text.includes("whatsapp open") ||
+      text.includes("whatsapp app")
+    ) {
+      if (isLiveCall) stopSession();
+      speakConfirmation("Ji boss, WhatsApp open kar raha hoon.");
+      openExternalLink("whatsapp://");
+      setTimeout(() => {
+        openExternalLink("https://api.whatsapp.com/send");
+      }, 400);
+      return true;
+    }
+
+    // 4. WhatsApp message command (e.g. "whatsapp message to 9876543210 saying hello")
+    if (
+      text.includes("whatsapp message") || 
+      text.includes("whatsapp par message") || 
+      text.includes("whatsapp pe message") ||
+      text.includes("whatsapp message send") ||
+      text.includes("whatsapp par message bhejo")
+    ) {
+      if (isLiveCall) stopSession();
+      
+      const phoneMatch = text.match(/\b\d{10}\b/) || text.match(/\b\d{12}\b/);
+      let phoneNumber = phoneMatch ? phoneMatch[0] : "";
+      
+      let messageText = "Hello from ZoZo AI!";
+      const messageIndicators = ["saying", "bolkar", "likh kar", "bolke", "message"];
+      for (const indicator of messageIndicators) {
+        const index = text.indexOf(indicator);
+        if (index !== -1) {
+          const potentialMsg = commandText.substring(index + indicator.length).trim();
+          if (potentialMsg) {
+            messageText = potentialMsg;
+            break;
+          }
+        }
+      }
+
+      if (!phoneNumber) {
+        if (text.includes("jeet") || text.includes("boss")) {
+          phoneNumber = "+919876543210";
+        } else {
+          speakConfirmation("WhatsApp par message bhejne ke liye mobile number parse nahi ho paya. WhatsApp open kar raha hoon.");
+          openExternalLink("whatsapp://");
+          return true;
+        }
+      }
+
+      speakConfirmation("WhatsApp par message send kar raha hoon.");
+      const encodedMsg = encodeURIComponent(messageText);
+      openExternalLink(`https://wa.me/${phoneNumber}?text=${encodedMsg}`);
+      return true;
+    }
+
+    // 5. Phone call command
+    if (
+      text.includes("call karo") || 
+      text.includes("phone karo") || 
+      text.includes("call lagao") ||
+      text.includes("make a call") ||
+      text.startsWith("call ") ||
+      text.includes("phone dial")
+    ) {
+      if (isLiveCall) stopSession();
+      
+      const phoneMatch = text.match(/\b\d{3,10}\b/) || text.match(/\b\d{11,12}\b/);
+      let phoneNumber = phoneMatch ? phoneMatch[0] : "";
+      
+      if (!phoneNumber) {
+        if (text.includes("jeet") || text.includes("boss")) {
+          phoneNumber = "+919876543210";
+        } else if (text.includes("police")) {
+          phoneNumber = "100";
+        } else if (text.includes("ambulance")) {
+          phoneNumber = "108";
+        } else if (text.includes("emergency") || text.includes("helpline")) {
+          phoneNumber = "112";
+        }
+      }
+
+      if (phoneNumber) {
+        speakConfirmation("Phone dialer open kar raha hoon.");
+        openExternalLink(`tel:${phoneNumber}`);
+        return true;
+      }
+    }
+
+    return false;
+  };
+
   const handleAction = async () => {
     const inputStr = chatInput.trim();
     if (!inputStr) return;
@@ -1200,6 +1355,18 @@ REAL HUMAN EXPRESSIONS & VOCAL MANNERISMS (ULTRA-REALISTIC HUMAN FEEL):
     setTimeout(() => {
       scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
     }, 40);
+
+    const wasCommand = executeVoiceCommand(inputStr, false);
+    if (wasCommand) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "model",
+          text: `Haan boss, aapka command execute kar diya hai! App open ho raha hai... 🚀`,
+        },
+      ]);
+      return;
+    }
 
     const isImageRequest = (text: string) => {
       const t = text.toLowerCase().trim();
@@ -1528,70 +1695,9 @@ Formatting:
   };
 
   const wrapWithDeviceFrame = (content: React.ReactNode) => {
-    // If preview frame is disabled, render standard layout with a button to toggle it back
-    if (!isPreviewFrameEnabled) {
-      return (
-        <div className="w-screen h-screen flex flex-col bg-[#0a0b0e] relative">
-          {content}
-          <div className="fixed top-4 right-4 z-[999] hidden md:block">
-            <button
-              onClick={() => setIsPreviewFrameEnabled(true)}
-              className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-bold shadow-lg border border-white/10 backdrop-blur-md flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
-              title="Preview inside iPhone 16 Pro Max device frame"
-            >
-              <Crown className="w-4 h-4 text-amber-400" />
-              <span>iPhone 16 Frame</span>
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    // Otherwise, render mockup frame on desktop
     return (
-      <div className="min-h-screen w-full bg-[#030406] flex items-center justify-center p-0 md:p-6 overflow-auto relative z-10">
-        {/* Beautiful Ambient Glows */}
-        <div className="absolute top-1/4 left-1/4 w-[450px] h-[450px] bg-[#2e6eff]/5 blur-[120px] rounded-full pointer-events-none z-0"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-[450px] h-[450px] bg-[#7bddff]/5 blur-[120px] rounded-full pointer-events-none z-0"></div>
-
-        {/* Frame Toggle Button */}
-        <div className="fixed top-4 right-4 z-[999] hidden md:block">
-          <button
-            onClick={() => setIsPreviewFrameEnabled(false)}
-            className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-bold shadow-lg border border-white/10 backdrop-blur-md flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
-            title="Switch to fullscreen standard web view"
-          >
-            <Crown className="w-4 h-4 text-amber-400 fill-amber-400" />
-            <span>Fullscreen View</span>
-          </button>
-        </div>
-
-        {/* iPhone 16 Pro Max Mockup Frame (Only active on desktop screen sizes) */}
-        <div className="relative mx-auto my-auto w-full h-screen md:w-[412px] md:h-[892px] md:rounded-[55px] md:border-[12px] md:border-[#1c1d22] md:ring-[4px] md:ring-[#3b3c40] md:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95)] overflow-hidden flex flex-col bg-[#0a0b0e] z-10 transition-all duration-300">
-          
-          {/* Side Buttons (Action, Volume Up/Down, Power) - Visible on desktop mockup */}
-          <div className="hidden md:block absolute left-[-15px] top-[140px] w-[3px] h-[30px] bg-[#3b3c40] rounded-r-sm z-50"></div> {/* Action Button */}
-          <div className="hidden md:block absolute left-[-15px] top-[190px] w-[3px] h-[60px] bg-[#3b3c40] rounded-r-sm z-50"></div> {/* Vol Up */}
-          <div className="hidden md:block absolute left-[-15px] top-[265px] w-[3px] h-[60px] bg-[#3b3c40] rounded-r-sm z-50"></div> {/* Vol Down */}
-          <div className="hidden md:block absolute right-[-15px] top-[200px] w-[3px] h-[75px] bg-[#3b3c40] rounded-l-sm z-50"></div> {/* Power Button */}
-          
-          {/* Dynamic Island (Desktop Frame only) */}
-          <div className="hidden md:flex absolute top-3 left-1/2 -translate-x-1/2 w-[110px] h-[28px] bg-black rounded-full z-[1000] border border-white/5 shadow-inner items-center justify-between px-3">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#0c1020] border border-white/10"></div>
-            <div className="w-1.5 h-1.5 rounded-full bg-[#080810] opacity-40"></div>
-          </div>
-
-          {/* Speaker Slit (Desktop Frame only) */}
-          <div className="hidden md:block absolute top-1 left-1/2 -translate-x-1/2 w-[60px] h-[3px] bg-[#1a1b1f] rounded-full z-[1000]"></div>
-
-          {/* Glare/Shine Effect Over Screen */}
-          <div className="hidden md:block absolute inset-0 bg-gradient-to-tr from-white/0 via-white/[0.02] to-white/[0.07] pointer-events-none z-[99] rounded-[43px]"></div>
-
-          {/* Inner Content Sized to Phone screen */}
-          <div className="flex-1 flex flex-col h-full overflow-hidden rounded-none md:rounded-[43px] relative z-10">
-            {content}
-          </div>
-        </div>
+      <div className="w-screen h-screen flex flex-col bg-[#0a0b0e] relative">
+        {content}
       </div>
     );
   };
