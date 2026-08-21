@@ -1868,9 +1868,14 @@ function loadStoredThreads() {
   if (!activeThreadHistory.length) {
     initializeNewThread();
   } else {
-    currentActiveThreadId = activeThreadHistory[0].id;
-    rebuildThreadsListView();
-    rebuildActiveThreadMessagesView();
+    const firstThread = activeThreadHistory[0];
+    if (firstThread && firstThread.messages && firstThread.messages.length === 0) {
+      currentActiveThreadId = firstThread.id;
+      rebuildThreadsListView();
+      rebuildActiveThreadMessagesView();
+    } else {
+      initializeNewThread();
+    }
   }
 }
 
